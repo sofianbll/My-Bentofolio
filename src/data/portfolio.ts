@@ -9,7 +9,7 @@ export const personalInfo = {
     alternance: {
         start: 'sept. 2026',
         duration: '14 mois',
-        rythme: '3/1 sem.',
+        rythme: '6/2 sem.',
     },
 }
 

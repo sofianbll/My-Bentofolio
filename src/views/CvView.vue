@@ -149,7 +149,8 @@ import PhotoCell from '@/components/sections/PhotoCell.vue'
   overflow: hidden;
   background: #fff;
   color: var(--color-zinc-900);
-  padding: 28mm 22mm;
+  //padding: 28mm 22mm;
+  padding: 32px;
   box-shadow: 0 4px 40px rgba(0, 0, 0, 0.12);
   font-family: var(--font-body);
   font-size: 11px;
