@@ -39,6 +39,14 @@ export function resolveMotionMode({ isPreviewFrame, reducedMotion, viewTransitio
   return viewTransitionsSupported ? 'full' : 'reduced';
 }
 
+/**
+ * The hero entrance reveal may only run when motion is allowed at all.
+ * Mirrors the CSS gating (prefers-reduced-motion + html.is-preview).
+ */
+export function shouldAnimateHero({ reducedMotion, isPreview }) {
+  return !reducedMotion && !isPreview;
+}
+
 /* ─── Runtime wiring ─── */
 
 /**

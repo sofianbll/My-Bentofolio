@@ -159,6 +159,79 @@ test.describe('Motion + Navigation', () => {
   });
 });
 
+test.describe('Hero cinétique (T02)', () => {
+  test('Full motion: hero reveal animation is wired', async ({ page }) => {
+    await page.goto(BASE + '/index.html#/');
+    await page.waitForSelector('.hero-name', { timeout: 5000 });
+    const anim = await page.locator('.hero-reveal-inner').first().evaluate(el => getComputedStyle(el).animationName);
+    expect(anim).toBe('heroLineIn');
+    await expect(page.locator('.hero-name')).toBeVisible();
+    await expect(page.locator('.hero-role')).toBeVisible();
+  });
+
+  test('Grain overlay is present, inert and excluded from print', async ({ page }) => {
+    await page.goto(BASE + '/index.html#/');
+    await page.waitForSelector('.grain-overlay', { timeout: 5000 });
+    const grain = await page.locator('.grain-overlay').evaluate(el => {
+      const s = getComputedStyle(el);
+      return { pointerEvents: s.pointerEvents, position: s.position, zIndex: s.zIndex, bg: s.backgroundImage };
+    });
+    expect(grain.pointerEvents).toBe('none');
+    expect(grain.position).toBe('fixed');
+    expect(parseInt(grain.zIndex)).toBeLessThan(1000);
+    expect(grain.bg).toContain('data:image/svg+xml');
+  });
+
+  test.describe('reduced motion', () => {
+    // Explicit context: test.use({ reducedMotion }) is not reliably applied
+    // inside a nested describe with this Playwright version.
+    test('Hero content visible, no persistent transform, bento cells visible', async ({ browser }) => {
+      const context = await browser.newContext({ reducedMotion: 'reduce' });
+      const page = await context.newPage();
+      await page.goto(BASE + '/index.html#/');
+      await page.waitForSelector('.hero-name', { timeout: 5000 });
+      await expect(page.locator('.hero-name')).toBeVisible();
+      await expect(page.locator('.hero-role')).toBeVisible();
+      await expect(page.locator('.hero-meta')).toBeVisible();
+
+      const mediaReduced = await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
+      expect(mediaReduced).toBe(true);
+
+      const inners = page.locator('.hero-reveal-inner');
+      const count = await inners.count();
+      expect(count).toBeGreaterThan(0);
+      for (let i = 0; i < count; i++) {
+        const transform = await inners.nth(i).evaluate(el => getComputedStyle(el).transform);
+        expect(transform).toBe('none');
+        const anim = await inners.nth(i).evaluate(el => getComputedStyle(el).animationName);
+        expect(anim).toBe('none');
+      }
+
+      await expect(page.locator('.bento .cell').first()).toBeVisible();
+      const cellTransform = await page.locator('.bento .cell').first().evaluate(el => getComputedStyle(el).transform);
+      expect(cellTransform === 'none' || cellTransform === 'matrix(1, 0, 0, 1, 0, 0)').toBe(true);
+      await context.close();
+    });
+  });
+
+  test.describe('preview mode', () => {
+    test('is-preview neutralises hero reveal and cell animations', async ({ page }) => {
+      await page.goto(BASE + '/index.html?preview#/');
+      await page.waitForSelector('.hero-name', { timeout: 5000 });
+      const isPreview = await page.evaluate(() => document.documentElement.classList.contains('is-preview'));
+      expect(isPreview).toBe(true);
+      await expect(page.locator('.hero-name')).toBeVisible();
+
+      const inner = page.locator('.hero-reveal-inner').first();
+      const transform = await inner.evaluate(el => getComputedStyle(el).transform);
+      expect(transform).toBe('none');
+      const anim = await inner.evaluate(el => getComputedStyle(el).animationName);
+      expect(anim).toBe('none');
+
+      await expect(page.locator('.bento .cell').first()).toBeVisible();
+    });
+  });
+});
 test.describe('Bentofolio - Admin UX', () => {
   test('Admin login page shows password input', async ({ page }) => {
     await page.goto(BASE + '/index.html#/admin');

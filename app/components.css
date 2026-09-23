@@ -99,6 +99,28 @@
 .cell:nth-child(3){animation-delay:.18s} .cell:nth-child(4){animation-delay:.24s}
 .cell:nth-child(5){animation-delay:.30s} .cell:nth-child(6){animation-delay:.36s}
 .cell:nth-child(7){animation-delay:.42s}
+
+/* ─── BENTO SCROLL REVEAL (T02 — ADR-0001) ───
+   Scroll-driven reveal on viewport entry: compositor-only opacity +
+   light translateY, no JS listeners. Fallback (no view() support) keeps
+   the time-based cellIn above; gating keeps content visible when motion
+   is reduced or the app runs in a preview frame. */
+@supports (animation-timeline: view()) {
+  .bento > .cell {
+    animation: cellReveal linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 45%;
+    animation-delay: 0s;
+  }
+}
+@keyframes cellReveal {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bento > .cell { animation: none; opacity: 1; transform: none; }
+}
+html.is-preview .bento > .cell { animation: none; opacity: 1; transform: none; }
 .cell--photo { min-height: var(--photo-min, 320px); padding: 0; }
 .cell--photo .cell__inner { padding: 0; }
 /* Premium hover: slow zoom + brand-mixed bottom veil */
@@ -115,14 +137,14 @@
 .hero-pills { display: flex; gap: var(--s2); flex-wrap: wrap; margin-bottom: var(--s5); }
 .hero-name { font-family: var(--font-display); font-size: clamp(38px, 5.5vw, 68px); font-weight: 800; line-height: 1.0; letter-spacing: var(--tracking-tight); margin-bottom: var(--s4); }
 .hero-name-accent {
-  background: linear-gradient(115deg, var(--brand) 10%, color-mix(in oklab, var(--brand) 45%, #ec4899) 90%);
+  background: var(--gradient-brand);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 .hero-role { font-size: var(--text-xl); font-weight: 500; letter-spacing: -0.01em; color: var(--text-2); margin-bottom: var(--s5); }
 .hero-pills .chip--solid {
-  background: linear-gradient(115deg, var(--brand), color-mix(in oklab, var(--brand) 70%, #8b5cf6));
+  background: var(--gradient-brand);
   color: #fff;
 }
 .hero-meta { display: flex; flex-wrap: wrap; gap: var(--s2); font-size: var(--text-sm); color: var(--text-2); margin-bottom: var(--s5); padding: var(--s3) var(--s4); background: var(--bg-inset); border-radius: var(--radius-md); }
@@ -132,6 +154,23 @@
 .hero-bio { font-size: var(--text-md); line-height: var(--leading-loose); color: var(--text-2); margin-top: var(--s5); padding-top: var(--s5); border-top: 1px solid var(--border-sub); max-width: 60ch; white-space: pre-line; }
 .hero-stats { display: flex; flex-wrap: wrap; gap: var(--s4); margin-top: var(--s3); font-size: var(--text-sm); color: var(--text-2); }
 .hero-stats span { display: flex; align-items: center; gap: 4px; }
+
+/* ─── HERO ENTRANCE REVEAL (T02 — ADR-0001) ───
+   Line-by-line mask reveal on load: wrapper clips, inner slides up.
+   Gated off under prefers-reduced-motion and in preview frames;
+   default state must remain visible content. */
+.hero-reveal { display: block; overflow: hidden; }
+.hero-reveal-inner {
+  display: block;
+  transform: translateY(110%);
+  animation: heroLineIn 0.9s var(--ease-out-expo) var(--reveal-delay, 0s) both;
+}
+.hero-meta .hero-reveal-inner { display: flex; flex-wrap: wrap; gap: var(--s2); }
+@keyframes heroLineIn { from { transform: translateY(110%); } to { transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .hero-reveal-inner { animation: none; transform: none; }
+}
+html.is-preview .hero-reveal-inner { animation: none; transform: none; }
 
 /* ─── PHOTO ─── */
 .photo-cell { position: relative; width: 100%; height: 100%; min-height: 320px; }

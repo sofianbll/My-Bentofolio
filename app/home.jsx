@@ -32,6 +32,9 @@ function HomeView({ navigate, openProject }) {
   const homeFeaturedProjects = visibleProjects.filter(p => p.homeFeatured);
   const preview = (homeFeaturedProjects.length > 0 ? homeFeaturedProjects : visibleProjects).slice(0, 4);
   const contactIcon = { 'Âge': 'star', 'Localisation': 'pin', 'Téléphone': 'phone', 'Email': 'mail' };
+  // Hero entrance reveal (T02): per-line mask reveal, CSS-only, gated
+  // via prefers-reduced-motion / html.is-preview in components.css.
+  const reveal = (delay) => ({ '--reveal-delay': delay });
 
   return (
     <main className="page-wrap">
@@ -45,9 +48,13 @@ function HomeView({ navigate, openProject }) {
               </Chip>
             ))}
           </div>
-          <h1 className="hero-name">{p.firstName}<br /><span className="hero-name-accent">{p.lastName}</span></h1>
-          <p className="hero-role">{p.role}</p>
-          <div className="hero-meta">
+          <h1 className="hero-name">
+            <span className="hero-reveal" style={reveal('0.10s')}><span className="hero-reveal-inner">{p.firstName}</span></span>
+            <span className="hero-reveal" style={reveal('0.22s')}><span className="hero-reveal-inner hero-name-accent">{p.lastName}</span></span>
+          </h1>
+          <p className="hero-role hero-reveal" style={reveal('0.34s')}><span className="hero-reveal-inner">{p.role}</span></p>
+          <div className="hero-meta hero-reveal" style={reveal('0.46s')}>
+            <span className="hero-reveal-inner">
             {DATA.profile?.webExperienceSince ? (
               <span><Icon name="star" size={12} /> {new Date().getFullYear() - DATA.profile.webExperienceSince} ans d'expérience</span>
             ) : (
@@ -57,6 +64,7 @@ function HomeView({ navigate, openProject }) {
             <span><strong>{p.alternance.duration}</strong></span>
             <span className="meta-sep">·</span>
             <span><strong>{p.alternance.rythme}</strong></span>
+            </span>
           </div>
           <p className="hero-bio">{p.bio}</p>
           <div className="hero-stats">

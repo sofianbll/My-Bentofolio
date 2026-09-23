@@ -275,6 +275,7 @@ function App() {
   return (
     <div className="app">
       <div className="mesh-bg" aria-hidden="true" />
+      <div className="grain-overlay no-print" aria-hidden="true" />
       {!isDash && <Navbar route={route} navigate={navigate} theme={theme} toggleTheme={toggleTheme} adminMode={adminMode} />}
       {isDash ? view : <div className="view-anim" key={route}>{view}</div>}
       {!isDash && <Footer navigate={navigate} />}
