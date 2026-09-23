@@ -31,3 +31,6 @@ test-results/
 *.njsproj
 *.sln
 *.sw?
+
+# Local screenshot helpers
+e2e/screenshots/

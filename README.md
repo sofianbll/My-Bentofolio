@@ -16,6 +16,16 @@ bun dev
 
 Ouvrir http://localhost:5173/
 
+## Adopter ce portfolio (le rendre le vôtre)
+
+1. `git clone https://github.com/Sofian-bll/My-Bentofolio.git` puis `bun install`
+2. Personnaliser `config.json` ou lancer `bun dev` et utiliser le dashboard `/#/admin` (mot de passe `bento`, configurable via `VITE_ADMIN_PASSWORD`)
+3. Remplacer `public/photo.jpg` et les images dans `public/media/projects/`
+4. Ajuster les métas/OG dans `index.html` (titre, description, image sociale)
+5. Déployer : pour GitHub Pages projet, `VITE_BASE_PATH=/NomDuRepo/ bun run build` puis publier `dist/`, ou adapter la base pour Netlify/Vercel (`/`)
+
+Tous les détails de personnalisation sont dans [docs/SETUP.md](docs/SETUP.md).
+
 ## Routes
 
 | Hash | Vue | Description |
@@ -36,7 +46,7 @@ Mot de passe admin : `bento` (dev uniquement — tree-shaken en production)
 bun run build
 ```
 
-Le dossier `dist/` est prêt à être déployé sur GitHub Pages. Base path configuré dans `vite.config.ts` : `/My-Bentofolio/`.
+Le dossier `dist/` est prêt à être déployé sur GitHub Pages. Le base path est piloté par la variable d'environnement `VITE_BASE_PATH` (voir [docs/SETUP.md](docs/SETUP.md)).
 
 ```bash
 bun run preview   # Prévisualiser le build production

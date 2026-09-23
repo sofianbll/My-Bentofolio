@@ -4,17 +4,20 @@
 
 - **Source entry (Open CoDesign)**: `App.jsx` — imports `app/app.jsx`
 - **Dev/build entry**: `index.html` — Vite template with `<script type="module" src="/App.jsx">`
-- **Production**: `npm run build` → `dist/` (static, deployable to GitHub Pages)
+- **Production**: `bun run build` → `dist/` (static, deployable to GitHub Pages)
 - **React**: 18.3.1 (bundled by Vite, vendored by Open CoDesign sandbox)
 - **CSS**: Imported via ES modules in `app/app.jsx`
 
 ## Commands
 
 ```bash
-npm install        # Install Vite + React
-npm run dev        # Dev server at http://localhost:5173
-npm run build      # Production build to dist/
-npm run preview    # Preview production build
+bun install        # Install dependencies (Bun is the canonical package manager)
+bun dev            # Dev server at http://localhost:5173
+bun run build      # Production build to dist/
+bun run preview    # Preview production build
+bun test           # Unit tests (Bun test runner)
+bun run test:e2e   # End-to-end tests (Playwright)
+bun run cv:pdf     # Export printable CV variants to dist/cv/
 ```
 
 ## Routes to test
