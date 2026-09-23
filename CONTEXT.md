@@ -18,6 +18,11 @@ Glossaire et conventions du domaine. Single-context : ce fichier couvre tout le 
 | **Tech tags** | Pills colorées par techno (classes `.t-{tech}`), couleurs définies dans `styles.css`. |
 | **Plugin Vite admin** | `vite-admin-plugin.ts` — endpoints dev (save, upload, CRUD projets, index). |
 | **Featured (home/CV)** | Drapeaux `homeFeatured` / sélection CV : quels projets ressortent où. |
+| **Moment signature** | L'effet waouh unique du site, décidé : typographie cinétique du hero + transitions morphing entre pages (direction « sobre mais cinétique »). Pas d'effet générique en plus. |
+| **Nav intelligente** | Pill nav qui disparaît au scroll descendant et réapparaît au scroll montant. |
+| **Menu overlay** | Menu plein écran (desktop + mobile) en grande typographie, ouvert depuis la nav. |
+| **Mode Stories** | Mode d'affichage de la galerie projets : cartes narratives pleine largeur, scroll vertical, grand format. |
+| **Mode Index** | Mode d'affichage de la galerie projets : grille dense actuelle. Le choix Stories/Index est mémorisé par le visiteur. |
 
 ## Décisions structurantes (résumé)
 
