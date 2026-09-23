@@ -45,7 +45,7 @@ test.describe('Bentofolio - Public UX', () => {
   test('Experiences page loads', async ({ page }) => {
     await page.goto(BASE + '/index.html#/experiences');
     await page.waitForSelector('.page-title', { timeout: 5000 });
-    await expect(page.locator('.page-title')).toContainText('Experiences');
+    await expect(page.locator('.page-title')).toContainText('Expériences');
   });
 
   test('CV page loads with A4 frame', async ({ page }) => {
@@ -67,9 +67,9 @@ test.describe('Bentofolio - Public UX', () => {
     await page.locator('.nav-link').filter({ hasText: 'Projets' }).click();
     await page.waitForSelector('.proj-gallery', { timeout: 5000 });
 
-    await page.locator('.nav-link').filter({ hasText: 'Experiences' }).click();
+    await page.locator('.nav-link').filter({ hasText: 'Expériences' }).click();
     await page.waitForSelector('.page-title', { timeout: 5000 });
-    await expect(page.locator('.page-title')).toContainText('Experiences');
+    await expect(page.locator('.page-title')).toContainText('Expériences');
 
     await page.locator('.nav-link').filter({ hasText: 'CV' }).click();
     await page.waitForSelector('.a4-page', { timeout: 5000 });
@@ -172,7 +172,7 @@ test.describe('Bentofolio - Admin UX', () => {
 
     await expect(page.locator('.ds-sub').filter({ hasText: 'content/projects' })).toBeVisible({ timeout: 2000 });
 
-    await page.locator('.ds-proj-row').first().locator('[title="Modifier"]').click();
+    await page.locator('.ds-proj-row').first().locator('[data-tip="Modifier"]').click();
     await expect(page.locator('.ds-title')).toContainText('Modifier');
     await expect(page.getByText('Insérer image étude de cas')).toBeVisible();
   });

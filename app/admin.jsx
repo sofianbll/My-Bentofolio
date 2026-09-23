@@ -3,7 +3,7 @@
    2-column layout: left controls + right preview
    ============================================= */
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { Icon, TechTag, CatGlyph, contrastText } from './ui.jsx'
+import { Icon, TechTag, CatGlyph, contrastText, InfoTip } from './ui.jsx'
 import { DATA, APP_CONFIG } from './data.js'
 import { clearAdminSaveOverrides, saveConfigToDisk } from './admin-save.js'
 import { saveProjectToContent, deleteProjectFromContent } from './admin-project-save.js'
@@ -51,11 +51,23 @@ function useConfigState() {
   const [profile, setProfile] = useState(() => ({ ...(APP_CONFIG.profile || {}) }))
   const [skillPalette, setSkillPalette] = useState(() => [...(APP_CONFIG.skillPalette || [])])
   const [homeFeatured, setHomeFeatured] = useState(() => [...(APP_CONFIG.homeFeatured || [])])
+  const [dirty, setDirty] = useState(false)
+  const wrap = (setter) => useCallback((v) => { setDirty(true); setter(v) }, [setter])
+  const setProjectsW = wrap(setProjects)
+  const setSocialLinksW = wrap(setSocialLinks)
+  const setPhotoW = wrap(setPhoto)
+  const setAppearanceW = wrap(setAppearance)
+  const setCvW = wrap(setCv)
+  const setContactW = wrap(setContact)
+  const setExperiencesW = wrap(setExperiences)
+  const setProfileW = wrap(setProfile)
+  const setSkillPaletteW = wrap(setSkillPalette)
+  const setHomeFeaturedW = wrap(setHomeFeatured)
 
   const config = buildConfig(projects, socialLinks, photo, appearance, cv, contact, experiences, profile, skillPalette, homeFeatured)
 
-  return { projects, setProjects, socialLinks, setSocialLinks, photo, setPhoto,
-    appearance, setAppearance, cv, setCv, contact, setContact, experiences, setExperiences, profile, setProfile, skillPalette, setSkillPalette, homeFeatured, setHomeFeatured, config }
+  return { projects, setProjects: setProjectsW, socialLinks, setSocialLinks: setSocialLinksW, photo, setPhoto: setPhotoW,
+    appearance, setAppearance: setAppearanceW, cv, setCv: setCvW, contact, setContact: setContactW, experiences, setExperiences: setExperiencesW, profile, setProfile: setProfileW, skillPalette, setSkillPalette: setSkillPaletteW, homeFeatured, setHomeFeatured: setHomeFeaturedW, config, dirty, setClean: () => setDirty(false) }
 }
 
 function syncLivePreview(cfg) {
@@ -160,10 +172,10 @@ function FocalPointControl({ label, hint, photo, value, fallback, aspectRatio, o
         </label>
       </div>
       <div className="ds-focal-presets">
-        <button className="btn btn--ghost" onClick={() => setPosition(50, 50)}>Centrer</button>
-        <button className="btn btn--ghost" onClick={() => setPosition(50, 18)}>Visage haut</button>
-        <button className="btn btn--ghost" onClick={() => setPosition(35, 25)}>Gauche</button>
-        <button className="btn btn--ghost" onClick={() => setPosition(65, 25)}>Droite</button>
+        <button className="btn btn--ghost" onClick={() => setPosition(50, 50)} data-tip="Centrer le regard" aria-label="Centrer le regard">Centrer</button>
+        <button className="btn btn--ghost" onClick={() => setPosition(50, 18)} data-tip="Cadrage portrait classique" aria-label="Cadrage portrait classique">Visage haut</button>
+        <button className="btn btn--ghost" onClick={() => setPosition(35, 25)} data-tip="Décaler à gauche" aria-label="Décaler à gauche">Gauche</button>
+        <button className="btn btn--ghost" onClick={() => setPosition(65, 25)} data-tip="Décaler à droite" aria-label="Décaler à droite">Droite</button>
       </div>
     </div>
   )
@@ -172,7 +184,14 @@ function FocalPointControl({ label, hint, photo, value, fallback, aspectRatio, o
 /* ─── MAIN DASHBOARD ─── */
 function DashboardView({ navigate, showToast, onLogout }) {
   const { projects, setProjects, socialLinks, setSocialLinks, photo, setPhoto,
-    appearance, setAppearance, cv, setCv, contact, setContact, experiences, setExperiences, profile, setProfile, skillPalette, setSkillPalette, homeFeatured, setHomeFeatured, config } = useConfigState()
+    appearance, setAppearance, cv, setCv, contact, setContact, experiences, setExperiences, profile, setProfile, skillPalette, setSkillPalette, homeFeatured, setHomeFeatured, config, dirty, setClean } = useConfigState()
+
+  useEffect(() => {
+    if (!dirty) return
+    const h = (e) => { e.preventDefault(); e.returnValue = '' }
+    window.addEventListener('beforeunload', h)
+    return () => window.removeEventListener('beforeunload', h)
+  }, [dirty])
 
   const [section, setSection] = useState('projets')
   const [previewPage, setPreviewPage] = useState('/')
@@ -252,6 +271,7 @@ function DashboardView({ navigate, showToast, onLogout }) {
         setProjects(merged)
         setDraftProject(null)
       }
+      setClean()
     } else {
       showToast(`Sauvegarde echouee — ${result.error || 'dev uniquement'}`)
     }
@@ -307,7 +327,7 @@ function DashboardView({ navigate, showToast, onLogout }) {
         </nav>
         <div className="dash-sidebar-footer">
           <button className="btn btn--brand" style={{width:'100%',marginBottom:'8px'}} onClick={handleSave} disabled={saving}>
-            <Icon name={saving ? 'check' : 'download'} size={14}/> {saving ? 'Sauvegarde...' : 'Sauvegarder'}
+            {dirty && <span className="dash-dirty-dot"/>}<Icon name={saving ? 'check' : 'download'} size={14}/> {saving ? 'Sauvegarde...' : 'Sauvegarder'}
           </button>
           <button className="btn btn--ghost" style={{width:'100%'}} onClick={() => navigate('/')}>
             <Icon name="arrowLeft" size={13}/> Voir le site
@@ -387,25 +407,25 @@ function AppearanceSection({ appearance, setAppearance, photo }) {
       <div className="ds-card">
         <div className="ds-form-grid">
           <div className="ds-field" style={{ gridColumn: '1/-1' }}>
-            <label className="ds-label">Couleur d'accent</label>
+            <label className="ds-label">Couleur d'accent <InfoTip text="Teinte des boutons, liens actifs et liserés au survol des cartes."/></label>
             <div className="ds-swatches">
-              {ACCENTS.map(c => <button key={c} className={'ds-swatch' + (appearance.accent === c ? ' on' : '')} style={{ '--c': c }} onClick={() => set('accent', c)} title={c} />)}
+              {ACCENTS.map(c => <button key={c} className={'ds-swatch' + (appearance.accent === c ? ' on' : '')} style={{ '--c': c }} onClick={() => set('accent', c)} data-tip={c} aria-label={c} />)}
             </div>
           </div>
-          <div className="ds-field"><label className="ds-label">Police titres</label>
+          <div className="ds-field"><label className="ds-label">Police titres <InfoTip text="S'applique aux titres Syne du site et du CV."/></label>
             <Seg k="displayFont" opts={[{v:'Syne',l:'Syne'},{v:'Space Grotesk',l:'Space G.'},{v:'Sora',l:'Sora'}]} /></div>
-          <div className="ds-field"><label className="ds-label">Densité</label>
+          <div className="ds-field"><label className="ds-label">Densité <InfoTip text="Espace entre les tuiles du bento."/></label>
             <Seg k="density" opts={[{v:'compact',l:'Dense'},{v:'cozy',l:'Cosy'},{v:'large',l:'Aéré'}]} /></div>
-          <div className="ds-field"><label className="ds-label">Arrondi</label>
+          <div className="ds-field"><label className="ds-label">Arrondi <InfoTip text="Rayon des coins : net, doux ou très rond."/></label>
             <Seg k="radius" opts={[{v:'net',l:'Net'},{v:'doux',l:'Doux'},{v:'rond',l:'Rond'}]} /></div>
-          <div className="ds-field"><label className="ds-label">Photo accueil</label>
+          <div className="ds-field"><label className="ds-label">Photo accueil <InfoTip text="Largeur relative de la photo dans la grille d'accueil."/></label>
             <Seg k="photo" opts={[{v:'compact',l:'Compacte'},{v:'equilibre',l:'Équil.'},{v:'grand',l:'Grande'}]} /></div>
         </div>
       </div>
       <div className="ds-card">
         <div className="ds-toggle-row" onClick={() => set('homeShowProjectImages', !appearance.homeShowProjectImages)}>
           <div>
-            <div className="ds-toggle-label">Images couverture sur l'accueil</div>
+            <div className="ds-toggle-label">Images couverture sur l'accueil <InfoTip text="Ajoute la miniature de chaque projet dans la section Projets de l'accueil."/></div>
             <div className="ds-toggle-sub">Affiche la miniature de chaque projet dans la section Projets de l'accueil</div>
           </div>
           <div className={'ds-switch' + (appearance.homeShowProjectImages ? ' on' : '')}/>
@@ -504,10 +524,10 @@ function CvSection({ cv, setCv, projects, photo, setPhoto, showToast }) {
       <div className="ds-card">
         <h3 className="ds-card-title">Style</h3>
         <div className="ds-form-grid">
-          <div className="ds-field"><label className="ds-label">Pills</label><Seg k="cvPills" opts={[{v:'couleur',l:'Couleur'},{v:'sombre',l:'Sombre'},{v:'mono',l:'Mono'}]}/></div>
-          <div className="ds-field"><label className="ds-label">Taille photo</label><Seg k="cvPhoto" opts={[{v:'petite',l:'Petite'},{v:'moyenne',l:'Moy.'},{v:'grande',l:'Grande'}]}/></div>
-          <div className="ds-field"><label className="ds-label">Bullets / carte</label><Seg k="cvMaxBullets" opts={[{v:1,l:'1'},{v:2,l:'2'},{v:3,l:'3'}]}/></div>
-          <div className="ds-field"><label className="ds-label">Densité cartes</label><Seg k="cvCardDensity" opts={[{v:'compact',l:'Dense'},{v:'normal',l:'Normal'}]}/></div>
+          <div className="ds-field"><label className="ds-label">Pills <InfoTip text="Style des pastilles technologies dans le CV."/></label><Seg k="cvPills" opts={[{v:'couleur',l:'Couleur'},{v:'sombre',l:'Sombre'},{v:'mono',l:'Mono'}]}/></div>
+          <div className="ds-field"><label className="ds-label">Taille photo <InfoTip text="Dimensions du portrait en tête du CV."/></label><Seg k="cvPhoto" opts={[{v:'petite',l:'Petite'},{v:'moyenne',l:'Moy.'},{v:'grande',l:'Grande'}]}/></div>
+          <div className="ds-field"><label className="ds-label">Bullets / carte <InfoTip text="Nombre de points forts affichés par projet dans le CV."/></label><Seg k="cvMaxBullets" opts={[{v:1,l:'1'},{v:2,l:'2'},{v:3,l:'3'}]}/></div>
+          <div className="ds-field"><label className="ds-label">Densité cartes <InfoTip text="Compacte les cartes projets pour gagner de la place."/></label><Seg k="cvCardDensity" opts={[{v:'compact',l:'Dense'},{v:'normal',l:'Normal'}]}/></div>
         </div>
       </div>
       <div className="ds-card">
@@ -539,7 +559,7 @@ function ContactSection({ contact, setContact }) {
       <div className="ds-card">
         <h3 className="ds-card-title">Provider</h3>
         <div className="ds-field">
-          <label className="ds-label">Endpoint Formspree</label>
+          <label className="ds-label">Endpoint Formspree <InfoTip text="Crée un formulaire sur formspree.io et colle l'URL d'envoi. Vide = ouverture du client email."/></label>
           <p className="ds-hint">POST → JSON. Laisse vide pour le fallback mailto:.</p>
           <input className="input" style={{marginTop:'8px'}} value={contact.formspreeUrl || ''} onChange={e => set('formspreeUrl', e.target.value)} placeholder="https://formspree.io/f/xxxxxxx" />
         </div>
@@ -629,9 +649,9 @@ function LinksSection({ socialLinks, setSocialLinks, showToast }) {
                   <a className="ds-list-href" href={l.href} target="_blank" rel="noreferrer">{l.href || '—'}</a>
                 </div>
                 <div className="ds-list-actions">
-                  <button className={'ds-vis-btn' + (l.hidden ? '' : ' on')} onClick={() => toggle(i)}>{l.hidden ? 'Masqué' : 'Visible'}</button>
-                  <button className="icon-btn" onClick={() => setEditIdx(i)} title="Modifier"><Icon name="pen" size={15}/></button>
-                  <button className="icon-btn" onClick={() => remove(i)} title="Supprimer"><Icon name="trash" size={15}/></button>
+                  <button className={'ds-vis-btn' + (l.hidden ? '' : ' on')} onClick={() => toggle(i)} data-tip="Affiche ou masque le lien sur le site" aria-label="Affiche ou masque le lien sur le site">{l.hidden ? 'Masqué' : 'Visible'}</button>
+                  <button className="icon-btn" onClick={() => setEditIdx(i)} data-tip="Modifier" aria-label="Modifier"><Icon name="pen" size={15}/></button>
+                  <button className="icon-btn" onClick={() => remove(i)} data-tip="Supprimer" aria-label="Supprimer"><Icon name="trash" size={15}/></button>
                 </div>
               </>
             )}
@@ -651,7 +671,7 @@ function SkillQuickPick({ palette, onPick }) {
       {(palette || []).map(sk => (
         <button key={sk.id} className={'pal-pill' + (sk.color ? '' : ' pal-pill--soft')}
           style={sk.color ? { background: sk.color, color: contrastText(sk.color) } : {}}
-          onClick={() => onPick(sk)} title={sk.label}>
+          onClick={() => onPick(sk)} data-tip={sk.label} aria-label={sk.label}>
           {sk.label}
         </button>
       ))}
@@ -761,16 +781,16 @@ function ProjectForm({ init, onSave, onCancel, showToast, onDraftChange, setPrev
     <div className="ds-card">
       <div className="ds-form-grid" style={{marginTop:'var(--s5)'}}>
         <div className="ds-field" style={{gridColumn:'1/-1'}}>
-          <label className="ds-label">Nom *</label>
+          <label className="ds-label">Nom * <InfoTip text="Nom affiché partout ; l'identifiant URL est dérivé automatiquement."/></label>
           <input className="input" value={f.name} onChange={e => set('name', e.target.value)} placeholder="Connect'IN" />
         </div>
         <div className="ds-field" style={{gridColumn:'1/-1'}}>
-          <label className="ds-label">Image principale</label>
+          <label className="ds-label">Image principale <InfoTip text="Miniature 16:7 conseillée ; sinon un placeholder coloré est généré."/></label>
           <div className="ds-image-row">
             {f.image ? (
               <div className="ds-image-prev">
                 <img src={resolveImageSrc(f.image)} alt="Apercu" />
-                <button className="ds-image-clear" onClick={() => set('image', '')} title="Supprimer"><Icon name="x" size={14}/></button>
+                <button className="ds-image-clear" onClick={() => set('image', '')} data-tip="Retirer l'image" aria-label="Retirer l'image"><Icon name="x" size={14}/></button>
               </div>
             ) : (
               <div className="ds-image-placeholder"><Icon name="download" size={24}/><span>Aucune image</span></div>
@@ -785,7 +805,7 @@ function ProjectForm({ init, onSave, onCancel, showToast, onDraftChange, setPrev
           </div>
         </div>
         <div className="ds-field">
-          <label className="ds-label">Catégories</label>
+          <label className="ds-label">Catégories <InfoTip text="Détermine la couleur et le filtre de la galerie. La première catégorie prime."/></label>
           <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginTop:'6px'}}>
             {Object.keys(DATA.categories).filter(k => !['ai','tools'].includes(k)).map(k => (
               <button key={k} className={'cat-opt' + (f.categories.includes(k) ? ' on' : '')} style={{'--co': DATA.categories[k].color}} onClick={() => toggleCat(k)}>
@@ -812,11 +832,11 @@ function ProjectForm({ init, onSave, onCancel, showToast, onDraftChange, setPrev
           </div>
         </div>
         <div className="ds-field" style={{gridColumn:'1/-1'}}>
-          <label className="ds-label">Description courte * (Markdown)</label>
+          <label className="ds-label">Description courte * (Markdown) <InfoTip text="Résumé en une phrase ou deux. Supporte le gras, l'italique et le code inline."/></label>
           <textarea className="textarea" value={f.description} onChange={e => set('description', e.target.value)} placeholder="**gras** *italique* `code` [lien](url) - liste" />
         </div>
         <div className="ds-field" style={{gridColumn:'1/-1'}}>
-          <label className="ds-label">Étude de cas complète (Markdown)</label>
+          <label className="ds-label">Étude de cas complète (Markdown) <InfoTip text="Contenu long de la page détail : titres ##, listes, images, code."/></label>
           <textarea className="textarea" style={{minHeight:'240px'}} value={f.caseStudy} onChange={e => set('caseStudy', e.target.value)} placeholder={'## Contexte\n\nExplique le problème, les choix techniques et les résultats.\n\n![Capture](media/projects/projet/capture.jpg)'} />
           <div className="ds-markdown-tools">
             <span>Supporte titres, listes, liens, code, citations et images markdown.</span>
@@ -849,7 +869,7 @@ function ProjectForm({ init, onSave, onCancel, showToast, onDraftChange, setPrev
                     placeholder="Contenu du bloc..."
                     style={{minHeight:'44px',flex:1}}
                   />
-                  <button className="icon-btn" onClick={() => set('caseStudyBlocks', (f.caseStudyBlocks || []).filter((_, j) => j !== i))} title="Supprimer">
+                  <button className="icon-btn" onClick={() => set('caseStudyBlocks', (f.caseStudyBlocks || []).filter((_, j) => j !== i))} data-tip="Supprimer" aria-label="Supprimer">
                     <Icon name="trash" size={14}/>
                   </button>
                 </div>
@@ -866,7 +886,7 @@ function ProjectForm({ init, onSave, onCancel, showToast, onDraftChange, setPrev
           </div>
         </div>
         <div className="ds-field" style={{gridColumn:'1/-1'}}>
-          <label className="ds-label">Bullets CV (3 max)</label>
+          <label className="ds-label">Bullets CV (3 max) <InfoTip text="Points forts courts repris dans la carte projet du CV."/></label>
           {[0,1,2].map(i => (
             <input key={i} className="input" style={{marginTop:'6px'}} value={(f.highlights||['','',''])[i]||''} onChange={e=>setHl(i,e.target.value)} placeholder={'Point '+(i+1)} />
           ))}
@@ -924,7 +944,8 @@ function ProjectsSection({ projects, setProjects, skillPalette, showToast, onDra
     onDraftChange(null)
   }
   const del = async (id) => {
-    if (!window.confirm('Supprimer ce projet ?')) return
+    const pr = projects.find(p => p.id === id)
+    if (!window.confirm(`Supprimer "${pr?.name || id}" ? Cette action est définitive.`)) return
     setProjects(projects.filter(p => p.id !== id))
     try {
       await deleteProjectFromContent(id)
@@ -980,10 +1001,10 @@ function ProjectsSection({ projects, setProjects, skillPalette, showToast, onDra
               <div className="ds-proj-meta">{pr.role} · {pr.period}{pr.duration ? ' · ' + pr.duration : ''}</div>
             </div>
             <div className="ds-proj-acts">
-              <button className={'ds-vis-btn' + (pr.visible !== false ? ' on' : '')} onClick={() => toggleVisibility(pr.id)}>{pr.visible !== false ? 'Visible' : 'Masqué'}</button>
-              <button className={'ds-vis-btn' + (homeFeatured.includes(pr.id) ? ' on' : '')} onClick={() => toggleHomeFeatured(pr.id)} style={{ marginLeft: 6 }}>Accueil</button>
-              <button className="icon-btn" onClick={() => startEdit(pr)} title="Modifier"><Icon name="pen" size={15}/></button>
-              <button className="icon-btn" onClick={() => del(pr.id)} title="Supprimer"><Icon name="trash" size={15}/></button>
+              <button className={'ds-vis-btn' + (pr.visible !== false ? ' on' : '')} onClick={() => toggleVisibility(pr.id)} data-tip="Affiche ou masque le projet sur le site (reste sauvegardé)" aria-label="Affiche ou masque le projet sur le site (reste sauvegardé)">{pr.visible !== false ? 'Visible' : 'Masqué'}</button>
+              <button className={'ds-vis-btn' + (homeFeatured.includes(pr.id) ? ' on' : '')} onClick={() => toggleHomeFeatured(pr.id)} style={{ marginLeft: 6 }} data-tip="Épinglé dans la section Projets de l'accueil (max 4)" aria-label="Épinglé dans la section Projets de l'accueil (max 4)">Accueil</button>
+              <button className="icon-btn" onClick={() => startEdit(pr)} data-tip="Modifier" aria-label="Modifier"><Icon name="pen" size={15}/></button>
+              <button className="icon-btn" onClick={() => del(pr.id)} data-tip="Supprimer" aria-label="Supprimer"><Icon name="trash" size={15}/></button>
             </div>
           </div>
         ))}
@@ -1083,8 +1104,8 @@ function PaletteSection({ skillPalette, setSkillPalette }) {
               ) : (
                 <h3 className="ds-card-title">{cat}</h3>
               )}
-              <button className="icon-btn" onClick={() => { setRenamingCat(cat); setRenameValue(cat) }} title="Renommer"><Icon name="pen" size={13} /></button>
-              <button className="icon-btn" onClick={() => deleteCat(cat)} title="Supprimer la catégorie"><Icon name="trash" size={13} /></button>
+              <button className="icon-btn" onClick={() => { setRenamingCat(cat); setRenameValue(cat) }} data-tip="Renommer" aria-label="Renommer"><Icon name="pen" size={13} /></button>
+              <button className="icon-btn" onClick={() => deleteCat(cat)} data-tip="Supprimer la catégorie" aria-label="Supprimer la catégorie"><Icon name="trash" size={13} /></button>
             </div>
             <div className="pal-grid">
               {skills.map(s => (
@@ -1113,7 +1134,7 @@ function PaletteSection({ skillPalette, setSkillPalette }) {
                       style={s.color ? { background: s.color, color: contrastText(s.color) } : {}}
                       onClick={() => startEdit(s)}>
                       {s.label}
-                      <span className="pal-pill-del" onClick={(e) => { e.stopPropagation(); remove(s.id) }} title="Supprimer"><Icon name="x" size={10} /></span>
+                      <span className="pal-pill-del" onClick={(e) => { e.stopPropagation(); remove(s.id) }} data-tip="Supprimer" aria-label="Supprimer"><Icon name="x" size={10} /></span>
                     </button>
                   )}
                 </div>
@@ -1211,7 +1232,7 @@ function ProfileSection({ profile, setProfile, skillPalette, showToast }) {
             <input className="input" value={profile.role || ''} onChange={e => set('role', e.target.value)} placeholder="Développeur Web Full Stack" />
           </div>
           <div className="ds-field">
-            <label className="ds-label">Expérience web depuis</label>
+            <label className="ds-label">Expérience web depuis <InfoTip text="Année de début ; calcule « N ans d'expérience » affiché sur l'accueil."/></label>
             <input className="input" type="number" value={profile.webExperienceSince || ''} onChange={e => set('webExperienceSince', Number(e.target.value) || null)} placeholder="2024" min="1900" max="2100" />
           </div>
         </div>
@@ -1269,7 +1290,7 @@ function ProfileSection({ profile, setProfile, skillPalette, showToast }) {
             </button>
             <button className="icon-btn" onClick={() => {
               set('contactInfos', (profile.contactInfos || []).filter((_, j) => j !== i))
-            }} title="Supprimer"><Icon name="trash" size={14} /></button>
+            }} data-tip="Supprimer" aria-label="Supprimer"><Icon name="trash" size={14} /></button>
           </div>
         ))}
         <button className="btn btn--ghost" style={{ marginTop: '8px' }} onClick={() => {
@@ -1317,7 +1338,7 @@ function ProfileSection({ profile, setProfile, skillPalette, showToast }) {
             }} placeholder="Texte de la pill" style={{ flex: 1 }} />
             <button className="icon-btn" onClick={() => {
               set('heroChips', (profile.heroChips || []).filter((_, j) => j !== i))
-            }} title="Supprimer"><Icon name="trash" size={14} /></button>
+            }} data-tip="Supprimer" aria-label="Supprimer"><Icon name="trash" size={14} /></button>
           </div>
         ))}
         <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
@@ -1343,7 +1364,7 @@ function ProfileSection({ profile, setProfile, skillPalette, showToast }) {
               }} placeholder="Catégorie (ex: Dev Web)" style={{ flex: 1 }} />
               <button className="icon-btn" onClick={() => {
                 set('skillGroups', (profile.skillGroups || []).filter((_, j) => j !== gi))
-              }} title="Supprimer le groupe"><Icon name="trash" size={14} /></button>
+              }} data-tip="Supprimer le groupe" aria-label="Supprimer le groupe"><Icon name="trash" size={14} /></button>
             </div>
             {(group.skills || []).map((sk, si) => (
               <div key={si} className="ds-block-row" style={{ marginBottom: '6px' }}>
@@ -1364,7 +1385,7 @@ function ProfileSection({ profile, setProfile, skillPalette, showToast }) {
                         skills[si] = { ...skills[si], tech: pk.id, color: pk.color || undefined }
                         next[gi] = { ...next[gi], skills }
                         set('skillGroups', next)
-                      }} title={pk.label}>
+                      }} data-tip={pk.label} aria-label={pk.label}>
                       {pk.label}
                     </button>
                   ))}
@@ -1373,7 +1394,7 @@ function ProfileSection({ profile, setProfile, skillPalette, showToast }) {
                   const next = [...(profile.skillGroups || [])]
                   next[gi] = { ...next[gi], skills: (next[gi].skills || []).filter((_, j) => j !== si) }
                   set('skillGroups', next)
-                }} title="Supprimer"><Icon name="x" size={12} /></button>
+                }} data-tip="Supprimer" aria-label="Supprimer"><Icon name="x" size={12} /></button>
               </div>
             ))}
             <button className="btn btn--ghost" onClick={() => {
@@ -1395,7 +1416,7 @@ function ProfileSection({ profile, setProfile, skillPalette, showToast }) {
           <div key={i} style={{ marginBottom: '16px', border: '1px solid var(--admin-line)', borderRadius: '12px', padding: '12px' }}>
             <div className="ds-block-row" style={{ marginBottom: '6px', justifyContent: 'space-between' }}>
               <strong>Formation {i + 1}</strong>
-              <button className="icon-btn" onClick={() => set('formations', (profile.formations || []).filter((_, j) => j !== i))} title="Supprimer">
+              <button className="icon-btn" onClick={() => set('formations', (profile.formations || []).filter((_, j) => j !== i))} data-tip="Supprimer" aria-label="Supprimer">
                 <Icon name="trash" size={14} />
               </button>
             </div>
@@ -1450,7 +1471,7 @@ function ProfileSection({ profile, setProfile, skillPalette, showToast }) {
             }} placeholder="Détail" style={{ flex: 1 }} />
             <button className="icon-btn" onClick={() => {
               set('interests', (profile.interests || []).filter((_, j) => j !== i))
-            }} title="Supprimer"><Icon name="trash" size={14} /></button>
+            }} data-tip="Supprimer" aria-label="Supprimer"><Icon name="trash" size={14} /></button>
           </div>
         ))}
         <button className="btn btn--ghost" onClick={() => {
@@ -1501,7 +1522,8 @@ function ExperiencesSection({ experiences, setExperiences, skillPalette, showToa
     showToast(editing && editing.id ? 'Experience mise a jour' : 'Experience ajoutee')
   }
   const del = (id) => {
-    if (!window.confirm('Supprimer cette experience ?')) return
+    const exp = experiences.find(e => e.id === id)
+    if (!window.confirm(`Supprimer l'expérience "${exp?.title || id}" ?`)) return
     setExperiences(experiences.filter(e => e.id !== id))
     showToast('Experience supprimee')
   }
@@ -1529,7 +1551,7 @@ function ExperiencesSection({ experiences, setExperiences, skillPalette, showToa
             <input className="input" value={f.period} onChange={e => set('period', e.target.value)} placeholder="2025-2026" />
           </div>
           <div className="ds-field">
-            <label className="ds-label">CV</label>
+            <label className="ds-label">CV <InfoTip text="Affiche cette expérience dans le bloc Parcours du CV."/></label>
             <button className={'ds-vis-btn' + (f.featured ? ' on' : '')} onClick={() => set('featured', !f.featured)}>
               {f.featured ? 'Featured' : 'Non'}
             </button>
@@ -1588,8 +1610,8 @@ function ExperiencesSection({ experiences, setExperiences, skillPalette, showToa
               <div className="ds-proj-meta">{exp.company} · {exp.period}</div>
             </div>
             <div className="ds-proj-acts">
-              <button className="icon-btn" onClick={() => startEdit(exp)} title="Modifier"><Icon name="pen" size={15}/></button>
-              <button className="icon-btn" onClick={() => del(exp.id)} title="Supprimer"><Icon name="trash" size={15}/></button>
+              <button className="icon-btn" onClick={() => startEdit(exp)} data-tip="Modifier" aria-label="Modifier"><Icon name="pen" size={15}/></button>
+              <button className="icon-btn" onClick={() => del(exp.id)} data-tip="Supprimer" aria-label="Supprimer"><Icon name="trash" size={15}/></button>
             </div>
           </div>
         ))}
@@ -1598,14 +1620,15 @@ function ExperiencesSection({ experiences, setExperiences, skillPalette, showToa
   )
 }
 
-const ADMIN_PASSWORD = 'bento'
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'bento'
 function AdminLogin({ onLogin }) {
   const [pwd, setPwd] = useState('')
   const [err, setErr] = useState(false)
+  const [shake, setShake] = useState(false)
   const submit = (e) => {
     e.preventDefault()
     if (pwd === ADMIN_PASSWORD) { onLogin() }
-    else { setErr(true); setPwd(''); setTimeout(() => setErr(false), 1800) }
+    else { setErr(true); setPwd(''); setShake(true); setTimeout(() => setShake(false), 500); setTimeout(() => setErr(false), 1800) }
   }
   return (
     <main className="page-wrap" style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'60vh'}}>
@@ -1616,7 +1639,7 @@ function AdminLogin({ onLogin }) {
           <form onSubmit={submit} style={{display:'flex',flexDirection:'column',gap:'12px',marginTop:'20px'}}>
             <div className="field">
               <label>Mot de passe</label>
-              <input className={'input' + (err ? ' input-error' : '')} type="password" value={pwd} onChange={e => setPwd(e.target.value)} placeholder="••••••" autoFocus/>
+              <input className={'input' + (err ? ' input-error' : '') + (shake ? ' shake' : '')} type="password" value={pwd} onChange={e => setPwd(e.target.value)} placeholder="••••••" autoFocus/>
               {err && <p style={{fontSize:'12px',color:'var(--cat-animation)',marginTop:'4px'}}>Mot de passe incorrect.</p>}
             </div>
             <button className="btn btn--brand" type="submit"><Icon name="arrowRight" size={15}/> Entrer</button>
