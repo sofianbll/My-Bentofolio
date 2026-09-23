@@ -323,7 +323,14 @@ function ProjectDetailView({ id, navigate, openProject }) {
         </aside>
       </div>
 
-      <button className="pd-next" onClick={() => openProject(next.id)}>
+      {/* T04/T05: rename the outgoing hero to the NEXT project's vt name so
+          detail → next-project morphs (same name on both snapshots) instead
+          of crossfading two differently-named heroes. */}
+      <button className="pd-next" onClick={(e) => {
+        const heroThumb = e.currentTarget.closest('main')?.querySelector('.pd-hero .thumb');
+        if (heroThumb) heroThumb.style.viewTransitionName = 'vt-proj-' + next.id;
+        openProject(next.id);
+      }}>
         <span className="pd-next-k">Projet suivant</span>
         <span className="pd-next-v"><CatGlyph cat={primaryCat(next)} size={16} /> {next.name} <Icon name="arrowRight" size={18} /></span>
       </button>

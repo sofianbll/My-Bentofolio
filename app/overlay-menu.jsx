@@ -13,7 +13,6 @@ const pad = (n) => String(n).padStart(2, '0');
 
 function OverlayMenu({ nav, route, onNavigate, onClose }) {
   const panelRef = useRef(null);
-  const activeIndex = Math.max(0, nav.findIndex((n) => route === n.path || (n.path === '/projets' && route.startsWith('/projet'))));
   const socials = APP_CONFIG.socialLinks || [];
   const alternance = APP_CONFIG.profile?.alternance || {};
 

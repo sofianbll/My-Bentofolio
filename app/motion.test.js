@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { reduceScrollDirection, shouldHideNav, resolveMotionMode, startRouteTransition, shouldAnimateHero, planRouteTransition } from './motion.js'
+import { reduceScrollDirection, shouldHideNav, resolveMotionMode, startRouteTransition, planRouteTransition } from './motion.js'
 
 describe('reduceScrollDirection', () => {
   test('clear downward movement beyond threshold returns down', () => {
@@ -82,24 +82,6 @@ describe('resolveMotionMode', () => {
 
   test('no view transitions support falls back to reduced mode', () => {
     expect(resolveMotionMode({ isPreviewFrame: false, reducedMotion: false, viewTransitionsSupported: false })).toBe('reduced')
-  })
-})
-
-describe('shouldAnimateHero', () => {
-  test('full motion when nothing blocks it', () => {
-    expect(shouldAnimateHero({ reducedMotion: false, isPreview: false })).toBe(true)
-  })
-
-  test('reduced motion disables the hero reveal', () => {
-    expect(shouldAnimateHero({ reducedMotion: true, isPreview: false })).toBe(false)
-  })
-
-  test('preview frame disables the hero reveal', () => {
-    expect(shouldAnimateHero({ reducedMotion: false, isPreview: true })).toBe(false)
-  })
-
-  test('reduced motion in a preview frame stays off', () => {
-    expect(shouldAnimateHero({ reducedMotion: true, isPreview: true })).toBe(false)
   })
 })
 

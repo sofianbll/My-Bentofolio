@@ -12,7 +12,7 @@ import { CvView } from './cv.jsx';
 import { ContactView } from './contact.jsx';
 import { APP_CONFIG } from './data.js';
 import { OverlayMenu } from './overlay-menu.jsx';
-import { resolveMotionMode, initSmoothScroll, reduceScrollDirection, shouldHideNav, startRouteTransition, detectMotionMode } from './motion.js';
+import { initSmoothScroll, reduceScrollDirection, shouldHideNav, startRouteTransition, detectMotionMode } from './motion.js';
 
 const AdminView = import.meta.env.DEV
   ? React.lazy(() => import('./admin.jsx').then(m => ({ default: m.AdminView })))
@@ -237,17 +237,15 @@ function App() {
 
   const isDash = route === '/admin' && adminMode && AdminView;
 
-  // Motion runtime (ADR-0001): Lenis smooth scroll only in 'full' mode,
-  // never in the admin dashboard route nor in a preview frame.
+  // Motion runtime (ADR-0001): Lenis smooth scroll in every mode except
+  // 'off' (preview frame or reduced motion), never in the admin dashboard.
+  // Mode resolved via detectMotionMode (single source of truth); the effect
+  // re-runs only when the gating context changes, not on every route change.
   useEffect(() => {
-    const mode = resolveMotionMode({
-      isPreviewFrame: isPreview,
-      reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-      viewTransitionsSupported: 'startViewTransition' in document,
-    });
-    if (mode !== 'full' || isDash) return undefined;
+    if (isDash) return undefined;
+    if (detectMotionMode(document) === 'off') return undefined;
     return initSmoothScroll();
-  }, [route, isDash, isPreview]);
+  }, [isDash, isPreview]);
 
   useEffect(() => {
     if (isPreview) document.documentElement.classList.add('is-preview')
