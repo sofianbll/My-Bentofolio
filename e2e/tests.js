@@ -79,6 +79,86 @@ test.describe('Bentofolio - Public UX', () => {
   });
 });
 
+test.describe('Motion + Navigation', () => {
+  test('Nav hides on scroll down and reappears on scroll up', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(BASE + '/index.html#/');
+    await page.waitForSelector('.navbar', { timeout: 5000 });
+
+    const scrollable = await page.evaluate(() => document.documentElement.scrollHeight > 800);
+    expect(scrollable).toBe(true);
+
+    await page.evaluate(() => window.scrollTo(0, 800));
+    await expect(page.locator('.navbar')).toHaveClass(/navbar-hidden/);
+
+    await page.evaluate(() => window.scrollTo(0, 400));
+    await expect(page.locator('.navbar')).not.toHaveClass(/navbar-hidden/);
+  });
+
+  test('Burger opens fullscreen overlay with 5 numbered links, active in brand color, Escape closes', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(BASE + '/index.html#/');
+    await page.waitForSelector('.navbar', { timeout: 5000 });
+
+    await page.locator('.hamburger-btn').click();
+    const overlay = page.locator('[data-testid="menu-overlay"]');
+    await expect(overlay).toBeVisible();
+
+    const links = page.locator('.menu-overlay-link');
+    await expect(links).toHaveCount(5);
+    const numbers = await page.locator('.menu-overlay-num').allTextContents();
+    expect(numbers).toEqual(['01', '02', '03', '04', '05']);
+
+    const activeColor = await links.filter({ hasText: 'Accueil' }).evaluate(el => window.getComputedStyle(el).color);
+    const inactiveColor = await links.filter({ hasText: 'Contact' }).evaluate(el => window.getComputedStyle(el).color);
+    expect(activeColor).not.toBe(inactiveColor);
+    expect(activeColor).not.toBe('');
+
+    await page.keyboard.press('Escape');
+    await expect(overlay).toHaveCount(0);
+  });
+
+  test('Clicking a link inside the overlay navigates and closes the overlay', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(BASE + '/index.html#/');
+    await page.waitForSelector('.navbar', { timeout: 5000 });
+
+    await page.locator('.hamburger-btn').click();
+    const overlay = page.locator('[data-testid="menu-overlay"]');
+    await expect(overlay).toBeVisible();
+
+    await page.locator('.menu-overlay-link').filter({ hasText: 'Projets' }).click();
+    await page.waitForSelector('.proj-gallery', { timeout: 5000 });
+    await expect(overlay).toHaveCount(0);
+    expect(await page.evaluate(() => location.hash)).toBe('#/projets');
+  });
+
+  test('No console errors during motion and navigation flows', async ({ page }) => {
+    const pageErrors = [];
+    page.on('pageerror', error => pageErrors.push(error.message));
+
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(BASE + '/index.html#/');
+    await page.waitForSelector('.navbar', { timeout: 5000 });
+
+    await page.evaluate(() => window.scrollTo(0, 800));
+    await page.waitForTimeout(100);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(100);
+
+    await page.locator('.hamburger-btn').click();
+    await expect(page.locator('[data-testid="menu-overlay"]')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('[data-testid="menu-overlay"]')).toHaveCount(0);
+
+    await page.locator('.hamburger-btn').click();
+    await page.locator('.menu-overlay-link').filter({ hasText: 'Expériences' }).click();
+    await page.waitForSelector('.page-title', { timeout: 5000 });
+
+    expect(pageErrors).toEqual([]);
+  });
+});
+
 test.describe('Bentofolio - Admin UX', () => {
   test('Admin login page shows password input', async ({ page }) => {
     await page.goto(BASE + '/index.html#/admin');
