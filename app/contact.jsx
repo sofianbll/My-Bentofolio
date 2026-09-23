@@ -104,13 +104,13 @@ function ContactView({ navigate, showToast, tweaks = {}, adminMode }) {
             <form onSubmit={handleSubmit} className="contact-form" noValidate={false}>
               <div className="cform-row">
                 <div className="field">
-                  <label>Nom <span className="req">*</span></label>
-                  <input className="input" name="nom" value={form.nom} onChange={handleChange}
-                    placeholder="Sofian Belloul" required />
+                  <label htmlFor="contact-nom">Nom <span className="req">*</span></label>
+                  <input id="contact-nom" className="input" name="nom" value={form.nom} onChange={handleChange}
+                    placeholder="Ton nom" required />
                 </div>
                 <div className="field">
-                  <label>Email <span className="req">*</span></label>
-                  <input className="input" name="email" type="email" value={form.email} onChange={handleChange}
+                  <label htmlFor="contact-email">Email <span className="req">*</span></label>
+                  <input id="contact-email" className="input" name="email" type="email" value={form.email} onChange={handleChange}
                     placeholder="toi@exemple.fr" required />
                 </div>
               </div>
@@ -119,15 +119,15 @@ function ContactView({ navigate, showToast, tweaks = {}, adminMode }) {
                 <div className="cform-row">
                   {showPhone && (
                     <div className="field">
-                      <label>Téléphone <span className="opt">optionnel</span></label>
-                      <input className="input" name="telephone" value={form.telephone} onChange={handleChange}
+                      <label htmlFor="contact-telephone">Téléphone <span className="opt">optionnel</span></label>
+                      <input id="contact-telephone" className="input" name="telephone" value={form.telephone} onChange={handleChange}
                         placeholder="+33 6 00 00 00 00" />
                     </div>
                   )}
                   {showType && (
                     <div className="field">
-                      <label>Type de contact <span className="opt">optionnel</span></label>
-                      <select className="select" name="type" value={form.type} onChange={handleChange}>
+                      <label htmlFor="contact-type">Type de contact <span className="opt">optionnel</span></label>
+                      <select id="contact-type" className="select" name="type" value={form.type} onChange={handleChange}>
                         <option value="">Sélectionner…</option>
                         {CONTACT_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                       </select>
@@ -137,14 +137,14 @@ function ContactView({ navigate, showToast, tweaks = {}, adminMode }) {
               )}
 
               <div className="field">
-                <label>Sujet <span className="req">*</span></label>
-                <input className="input" name="sujet" value={form.sujet} onChange={handleChange}
+                <label htmlFor="contact-sujet">Sujet <span className="req">*</span></label>
+                <input id="contact-sujet" className="input" name="sujet" value={form.sujet} onChange={handleChange}
                   placeholder="Proposition d'alternance — sept. 2026" required />
               </div>
 
               <div className="field">
-                <label>Message <span className="req">*</span></label>
-                <textarea className="textarea contact-textarea" name="message" value={form.message}
+                <label htmlFor="contact-message">Message <span className="req">*</span></label>
+                <textarea id="contact-message" className="textarea contact-textarea" name="message" value={form.message}
                   onChange={handleChange} placeholder="Dis-moi tout…" rows={6} required></textarea>
               </div>
 

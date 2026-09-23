@@ -35,7 +35,7 @@ function ExperienceDetail({ experience, onClose }) {
           </div>
           <div className="modal-meta">
             <span>Entreprise <b>{experience.company}</b></span>
-            <span>Periode <b>{experience.period}</b></span>
+            <span>Période <b>{experience.period}</b></span>
             {experience.location && <span>Lieu <b>{experience.location}</b></span>}
           </div>
           {experience.highlights && experience.highlights.length > 0 && (
@@ -64,13 +64,13 @@ function ExperiencesView({ navigate }) {
     <main className="page-wrap">
       <button className="back-link" onClick={() => navigate('/')}><Icon name="arrowLeft" size={16} /> Retour au portfolio</button>
       <div className="page-head">
-        <h1 className="page-title">Experiences</h1>
-        <p className="page-sub">Parcours professionnel : missions, postes et realisations.</p>
+        <h1 className="page-title">Expériences</h1>
+        <p className="page-sub">Parcours professionnel : missions, postes et réalisations.</p>
       </div>
       {experiences.length === 0 ? (
-        <div className="empty-state">
+        <div className="empty-state" style={{ textAlign: 'center', padding: '48px 16px', opacity: 0.7 }}>
           <Icon name="briefcase" size={40} />
-          <p>Aucune experience pour le moment.</p>
+          <p>Aucune expérience pour le moment.</p>
         </div>
       ) : (
         <div className="proj-gallery">

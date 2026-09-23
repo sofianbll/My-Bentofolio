@@ -140,9 +140,9 @@ function CvView({ navigate, showToast, tweaks = {}, setTweak }) {
               {/* Section experiences */}
               <div className="cv-proj-section">
                 <hr className="cv-divider" />
-                <div className="cv-sec-title">Experiences {featuredExperiences.length > 0 && <span style={{ color: 'var(--color-zinc-400)', fontWeight: 600 }}>· {featuredExperiences.length}</span>}</div>
+                <div className="cv-sec-title">Expériences {featuredExperiences.length > 0 && <span style={{ color: 'var(--color-zinc-400)', fontWeight: 600 }}>· {featuredExperiences.length}</span>}</div>
                 {featuredExperiences.length === 0 ? (
-                  <p className="cv-empty-note">Aucune experience marquee comme featured dans la configuration.</p>
+                  <p className="cv-empty-note">Aucune expérience marquée comme featured dans la configuration.</p>
                 ) : (
                   <div className="cv-projects">
                     {featuredExperiences.map(e => (
