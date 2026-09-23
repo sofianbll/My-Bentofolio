@@ -315,6 +315,7 @@ function TweakSlider({ label, value, min = 0, max = 100, step = 1, unit = '', on
   return (
     <TweakRow label={label} value={`${value}${unit}`}>
       <input type="range" className="twk-slider" min={min} max={max} step={step}
+             aria-label={label}
              value={value} onChange={(e) => onChange(Number(e.target.value))} />
     </TweakRow>
   );
@@ -406,7 +407,8 @@ function TweakRadio({ label, value, options, onChange }) {
 function TweakSelect({ label, value, options, onChange }) {
   return (
     <TweakRow label={label}>
-      <select className="twk-field" value={value} onChange={(e) => onChange(e.target.value)}>
+      <select className="twk-field" value={value} aria-label={label}
+              onChange={(e) => onChange(e.target.value)}>
         {options.map((o) => {
           const v = typeof o === 'object' ? o.value : o;
           const l = typeof o === 'object' ? o.label : o;
@@ -421,6 +423,7 @@ function TweakText({ label, value, placeholder, onChange }) {
   return (
     <TweakRow label={label}>
       <input className="twk-field" type="text" value={value} placeholder={placeholder}
+             aria-label={label}
              onChange={(e) => onChange(e.target.value)} />
     </TweakRow>
   );
@@ -454,6 +457,7 @@ function TweakNumber({ label, value, min, max, step = 1, unit = '', onChange }) 
     <div className="twk-num">
       <span className="twk-num-lbl" onPointerDown={onScrubStart}>{label}</span>
       <input type="number" value={value} min={min} max={max} step={step}
+             aria-label={label}
              onChange={(e) => onChange(clamp(Number(e.target.value)))} />
       {unit && <span className="twk-num-unit">{unit}</span>}
     </div>

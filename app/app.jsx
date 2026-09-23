@@ -1,7 +1,7 @@
 /* =============================================
    BENTOFOLIO v5 — App shell (router, theme, nav, footer)
    ============================================= */
-import React, { useState, useEffect, useCallback, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { useTweaks } from './tweaks-panel.jsx';
 import { Icon } from './ui.jsx';
@@ -11,6 +11,8 @@ import { ExperiencesView } from './experiences.jsx';
 import { CvView } from './cv.jsx';
 import { ContactView } from './contact.jsx';
 import { APP_CONFIG } from './data.js';
+import { OverlayMenu } from './overlay-menu.jsx';
+import { initSmoothScroll, reduceScrollDirection, shouldHideNav, startRouteTransition, detectMotionMode } from './motion.js';
 
 const AdminView = import.meta.env.DEV
   ? React.lazy(() => import('./admin.jsx').then(m => ({ default: m.AdminView })))
@@ -70,7 +72,7 @@ const THEME_KEY = 'bentofolio.theme';
 const NAV = [
 { path: '/', label: 'Accueil', icon: 'home' },
 { path: '/projets', label: 'Projets', icon: 'grid' },
-{ path: '/experiences', label: 'Experiences', icon: 'briefcase' },
+{ path: '/experiences', label: 'Expériences', icon: 'briefcase' },
 { path: '/cv', label: 'CV', icon: 'cv' },
 { path: '/contact', label: 'Contact', icon: 'mail' }];
 
@@ -82,13 +84,42 @@ function parseHash() {
 
 function Navbar({ route, navigate, theme, toggleTheme, adminMode }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [navHidden, setNavHidden] = useState(false);
+  const scrollRef = useRef({ y: window.scrollY, dir: 'up' });
+  const rafRef = useRef(0);
+  const burgerRef = useRef(null);
+  useEffect(() => {
+    const onScroll = () => {
+      if (rafRef.current) return;
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = 0;
+        const currentY = window.scrollY;
+        const { dir, y } = reduceScrollDirection({
+          lastY: scrollRef.current.y,
+          currentY,
+          lastDir: scrollRef.current.dir,
+        });
+        scrollRef.current = { y, dir };
+        setNavHidden(shouldHideNav(dir, currentY));
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+  const first = APP_CONFIG.profile?.firstName || '';
+  const last = APP_CONFIG.profile?.lastName || '';
+  const brandName = (first + ' ' + (last ? last.charAt(0).toUpperCase() + '.' : '')).trim() || 'Portfolio';
   const handleNav = (path) => { navigate(path); setMenuOpen(false); };
+  const closeMenu = () => { setMenuOpen(false); burgerRef.current?.focus(); };
   return (
     <>
-      <nav className="navbar no-print">
+      <nav className={'navbar no-print' + (navHidden && !menuOpen ? ' navbar-hidden' : '')}>
         <div className="nav-inner">
           <button className="nav-brand" onClick={() => handleNav('/')}>
-            <span className="brand-name">Sofian Bll</span>
+            <span className="brand-name">{brandName}</span>
             <span className="brand-dot">·</span>
             <span className="brand-tag">portfolio</span>
           </button>
@@ -111,40 +142,46 @@ function Navbar({ route, navigate, theme, toggleTheme, adminMode }) {
             <button className="icon-btn" aria-label="Changer le thème" onClick={toggleTheme}>
               <Icon name={theme === 'light' ? 'moon' : 'sun'} size={18} />
             </button>
-            <button className="icon-btn hamburger-btn" aria-label={menuOpen ? 'Fermer le menu' : 'Menu'} onClick={() => setMenuOpen((v) => !v)}>
+            <button
+              className="icon-btn hamburger-btn"
+              aria-label={menuOpen ? 'Fermer le menu' : 'Menu'}
+              aria-expanded={menuOpen}
+              aria-controls="menu-overlay"
+              ref={burgerRef}
+              onClick={() => setMenuOpen((v) => !v)}
+            >
               <Icon name={menuOpen ? 'x' : 'menu'} size={18} />
             </button>
           </div>
         </div>
       </nav>
       {menuOpen && (
-        <div className="mobile-nav-overlay no-print" onClick={() => setMenuOpen(false)}>
-          <div className="mobile-nav-panel" onClick={(e) => e.stopPropagation()}>
-            {NAV.map((n) => {
-              const active = route === n.path || (n.path === '/projets' && route.startsWith('/projet'));
-              return (
-                <button key={n.path} className={'mobile-nav-link' + (active ? ' active' : '')} onClick={() => handleNav(n.path)}>
-                  <Icon name={n.icon} size={20} />
-                  {n.label}
-                </button>);
-            })}
-          </div>
-        </div>
+        <OverlayMenu
+          nav={NAV}
+          route={route}
+          onNavigate={handleNav}
+          onClose={closeMenu}
+        />
       )}
     </>
   );
 }
 
 function Footer({ navigate }) {
+  const year = new Date().getFullYear();
+  const first = APP_CONFIG.profile?.firstName || '';
+  const last = APP_CONFIG.profile?.lastName || '';
+  const gh = (APP_CONFIG.socialLinks || []).find(l => (l.icon === 'github' || (l.label || '').toLowerCase().includes('github')));
+  const ghHref = gh?.href || 'https://github.com/';
   return (
     <footer className="app-footer no-print">
       <div className="footer-inner">
-        <span className="footer-copy">© {new Date().getFullYear()} Sofian Belloul — Développeur Web Full Stack</span>
+        <span className="footer-copy">© {year} {first} {last} — {APP_CONFIG.profile?.role || 'Portfolio'}</span>
         <div className="footer-links">
           <button className="footer-link" onClick={() => navigate('/projets')}>Projets</button>
           <button className="footer-link" onClick={() => navigate('/cv')}>CV</button>
           {import.meta.env.DEV && <button className="footer-link is-private" onClick={() => navigate('/admin')}>Espace admin</button>}
-          <a className="footer-link" href="https://github.com/Sofian-bll" target="_blank" rel="noreferrer">GitHub</a>
+          <a className="footer-link" href={ghHref} target="_blank" rel="noreferrer">GitHub</a>
         </div>
       </div>
     </footer>);
@@ -186,10 +223,29 @@ function App() {
   }, [tweaks]);
 
   useEffect(() => {
-    const onHash = () => {setRoute(parseHash());window.scrollTo(0, 0);};
+    const onHash = () => {
+      // A route change already applied synchronously inside the View
+      // Transition callback (see requestRouteTransition) will fire a
+      // duplicate hashchange a tick later: swallow it once.
+      if (skipNextHash.current) { skipNextHash.current = false; return; }
+      setRoute(parseHash());
+      window.scrollTo(0, 0);
+    };
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
+
+  const isDash = route === '/admin' && adminMode && AdminView;
+
+  // Motion runtime (ADR-0001): Lenis smooth scroll in every mode except
+  // 'off' (preview frame or reduced motion), never in the admin dashboard.
+  // Mode resolved via detectMotionMode (single source of truth); the effect
+  // re-runs only when the gating context changes, not on every route change.
+  useEffect(() => {
+    if (isDash) return undefined;
+    if (detectMotionMode(document) === 'off') return undefined;
+    return initSmoothScroll();
+  }, [isDash, isPreview]);
 
   useEffect(() => {
     if (isPreview) document.documentElement.classList.add('is-preview')
@@ -200,12 +256,31 @@ function App() {
     safeStorage.set(THEME_KEY, theme);
   }, [theme]);
 
+  // T04 (ADR-0001): route changes morph via document.startViewTransition
+  // in 'full' mode. The setState + hash write happen synchronously inside
+  // the VT callback so the old DOM is captured before, the new one after.
+  // In 'off'/'reduced' mode (or towards /admin) the hash write is plain and
+  // the hashchange listener applies the route, exactly as before T04.
+  const skipNextHash = useRef(false);
+  const requestRouteTransition = useCallback((path) => {
+    if (path === '/admin' || detectMotionMode(document) !== 'full') {
+      location.hash = '#' + path;
+      return;
+    }
+    startRouteTransition(document, () => {
+      skipNextHash.current = true; // the hashchange from this write is a duplicate
+      location.hash = '#' + path;
+      setRoute(path);
+      window.scrollTo(0, 0); // inside the callback so the scroll animates with the transition
+    });
+  }, []);
+
   const navigate = useCallback((path) => {
     if (parseHash() === path) {window.scrollTo(0, 0);return;}
-    location.hash = '#' + path;
-  }, []);
+    requestRouteTransition(path);
+  }, [requestRouteTransition]);
   const toggleTheme = () => setTheme((t) => t === 'light' ? 'dark' : 'light');
-  const openProject = (id) => {location.hash = '#/projet/' + id;};
+  const openProject = (id) => requestRouteTransition('/projet/' + id);
   const showToast = (msg) => {
     setToast(msg);
     clearTimeout(window.__toastT);
@@ -221,12 +296,12 @@ function App() {
   else if (route === '/admin' && AdminView) view = <Suspense fallback={null}><AdminView navigate={navigate} showToast={showToast} adminMode={adminMode} onLogin={activateAdmin} onLogout={deactivateAdmin} /></Suspense>;
   else view = <HomeView navigate={navigate} openProject={openProject} />;
 
-  const isDash = route === '/admin' && adminMode && AdminView;
   return (
     <div className="app">
       <div className="mesh-bg" aria-hidden="true" />
+      <div className="grain-overlay no-print" aria-hidden="true" />
       {!isDash && <Navbar route={route} navigate={navigate} theme={theme} toggleTheme={toggleTheme} adminMode={adminMode} />}
-      {view}
+      {isDash ? view : <div className="view-anim" key={route}>{view}</div>}
       {!isDash && <Footer navigate={navigate} />}
       <div className={'toast no-print' + (toast ? ' show' : '')}><Icon name="check" size={15} /> {toast}</div>
     </div>);

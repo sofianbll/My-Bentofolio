@@ -16,6 +16,38 @@ bun dev
 
 Ouvrir http://localhost:5173/
 
+## Adopter ce portfolio (le rendre le vôtre)
+
+1. `git clone https://github.com/Sofian-bll/My-Bentofolio.git` puis `bun install`
+2. Personnaliser `config.json` ou lancer `bun dev` et utiliser le dashboard `/#/admin` (mot de passe `bento`, configurable via `VITE_ADMIN_PASSWORD`)
+3. Remplacer `public/photo.jpg` et les images dans `public/media/projects/`
+4. Ajuster les métas/OG dans `index.html` (titre, description, image sociale)
+5. Déployer : pour GitHub Pages projet, `VITE_BASE_PATH=/NomDuRepo/ bun run build` puis publier `dist/`, ou adapter la base pour Netlify/Vercel (`/`)
+
+Tous les détails de personnalisation sont dans [docs/SETUP.md](docs/SETUP.md).
+
+## Expérience & motion
+
+Le portfolio embarque une stack motion sobre et cinétique (décision d'architecture : [docs/adr/0001-motion-stack-sobre-cinetique.md](docs/adr/0001-motion-stack-sobre-cinetique.md), design system : [docs/DESIGN.md](docs/DESIGN.md)) :
+
+- **Smooth scroll Lenis** (mode `full`), **nav intelligente** (pill masquée au scroll vers le bas, réaffichée vers le haut) et **menu plein écran** numéroté.
+- **Héro à révélation lignée** au chargement et **grain** fixe, inerte, sur toutes les pages.
+- **Révélations au scroll** en CSS pur (`animation-timeline: view()`, sans JS) : cellules bento de l'accueil, sections Stories, blocs des pages CV et Contact (classe utilitaire `.reveal`).
+- **Mode Stories/Index** sur `/#/projets` : sections pleine largeur avec parallax léger, ou galerie dense filtrable.
+- **View Transitions morphing** entre la vignette cliquée et le héro de la page détail ; pages détail **teintées** par la couleur de la catégorie primaire.
+
+Tout est désactivable et tombe gracieusement : la stack se coupe automatiquement sous `prefers-reduced-motion`, dans les aperçus admin (`?preview` → `html.is-preview`), et n'existe qu'à l'écran (neutralisée en `@media print`). Sur les navigateurs sans support de `animation-timeline: view()`, le contenu reste simplement visible.
+
+## Avant de déployer (checklist)
+
+- [ ] `config.json` personnalisé : profil, projets, expériences, liens sociaux, contact (URL Formspree)
+- [ ] `VITE_BASE_PATH` correct pour la cible (`/NomDuRepo/` pour GitHub Pages projet, `/` pour Netlify/Vercel)
+- [ ] `bun test` vert (tests unitaires)
+- [ ] `bun run test:e2e` vert (serveur dev lancé sur le port 5173)
+- [ ] `bun run build` vert, puis `bun run preview` pour vérifier `dist/`
+- [ ] Métas/OG de `index.html` à jour (titre, description, image sociale)
+- [ ] `public/photo.jpg` et `public/media/projects/` remplacés par vos visuels
+
 ## Routes
 
 | Hash | Vue | Description |
@@ -36,7 +68,7 @@ Mot de passe admin : `bento` (dev uniquement — tree-shaken en production)
 bun run build
 ```
 
-Le dossier `dist/` est prêt à être déployé sur GitHub Pages. Base path configuré dans `vite.config.ts` : `/My-Bentofolio/`.
+Le dossier `dist/` est prêt à être déployé sur GitHub Pages. Le base path est piloté par la variable d'environnement `VITE_BASE_PATH` (voir [docs/SETUP.md](docs/SETUP.md)).
 
 ```bash
 bun run preview   # Prévisualiser le build production

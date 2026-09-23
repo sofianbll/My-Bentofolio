@@ -40,6 +40,7 @@ const ICON_PATHS = {
   server: <><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></>,
   brain: <><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></>,
   briefcase: <><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></>,
+  info: <><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></>,
 };
 
 function Icon({ name, size = 18, fill = 'none', strokeWidth = 2, style, className }) {
@@ -127,35 +128,40 @@ function CatGlyph({ cat, size = 16 }) {
     </span>
   );
 }
-function CatPill({ cat }) {
+function CatPill({ cat, accent }) {
   const meta = DATA.categories[cat];
   if (!meta) return null;
+  // T05: `accent` tints the pill with the surrounding page's --detail-accent
+  // (used on project detail headers); default keeps each category's own color.
   return (
-    <span className="cat-pill" style={{ '--c': meta.color }}>
+    <span className="cat-pill" style={{ '--c': accent ? 'var(--detail-accent)' : meta.color }}>
       <Icon name={meta.glyph} size={13} />
       {meta.label}
     </span>
   );
 }
 /* Renders every category a project belongs to (multi-category aware) */
-function CatPills({ project, max }) {
+function CatPills({ project, max, accent }) {
   const cats = projCats(project);
   const shown = max ? cats.slice(0, max) : cats;
   return (
     <span className="cat-pills">
-      {shown.map((c) => <CatPill key={c} cat={c} />)}
+      {shown.map((c) => <CatPill key={c} cat={c} accent={accent} />)}
       {max && cats.length > max && <span className="cat-pill cat-pill--more">+{cats.length - max}</span>}
     </span>
   );
 }
 
-/* ─── PROJECT THUMBNAIL (placeholder) ─── */
-function ProjectThumb({ project, ratio = '16 / 10' }) {
+/* ─── PROJECT THUMBNAIL (placeholder) ───
+   T04: pass `vt` to pin a view-transition-name on this thumbnail. Grid
+   thumbs stay unnamed (INP budget: no extra layers) — the name is armed
+   on the clicked element only, just before navigation. */
+function ProjectThumb({ project, ratio = '16 / 10', vt }) {
   const primary = primaryCat(project);
   const meta = DATA.categories[primary];
   const c = meta ? meta.color : 'var(--brand)';
   return (
-    <div className="thumb" style={{ '--c': c, aspectRatio: ratio }}>
+    <div className="thumb" style={{ '--c': c, aspectRatio: ratio, ...(vt ? { viewTransitionName: vt } : null) }}>
       {project.image
         ? <img src={resolveImageSrc(project.image)} alt={project.name} className="thumb-img" />
         : (
@@ -168,4 +174,24 @@ function ProjectThumb({ project, ratio = '16 / 10' }) {
   );
 }
 
-export { Icon, Badge, Chip, TechTag, SectionTitle, Cell, CatGlyph, CatPill, CatPills, ProjectThumb };
+/**
+ * T04: arms the morphing source inside `scope` right before navigation so
+ * the clicked thumbnail morphs into the detail hero (same vt-proj-<id>).
+ * @param {HTMLElement} scope element containing a .thumb / .story-img / .story-media-ph
+ * @param {string} projectId
+ */
+function armProjectMorph(scope, projectId) {
+  const media = scope?.querySelector('.thumb, .story-img, .story-media-ph');
+  if (media) media.style.viewTransitionName = 'vt-proj-' + projectId;
+}
+
+/* ─── INFO TOOLTIP ─── */
+function InfoTip({ text }) {
+  return (
+    <span className="infotip" tabIndex={0} data-tip={text} aria-label={'Aide : ' + text}>
+      <Icon name="info" size={12} />
+    </span>
+  );
+}
+
+export { Icon, Badge, Chip, TechTag, SectionTitle, Cell, CatGlyph, CatPill, CatPills, ProjectThumb, InfoTip, armProjectMorph };

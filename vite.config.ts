@@ -4,7 +4,7 @@ import { adminPlugin } from './vite-admin-plugin'
 
 export default defineConfig({
   plugins: [react(), adminPlugin()],
-  base: '/',
+  base: process.env.VITE_BASE_PATH || '/',
   build: {
     outDir: 'dist',
   },

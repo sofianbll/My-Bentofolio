@@ -2,12 +2,13 @@
    BENTOFOLIO — Projects gallery + detail modal (ES module)
    ============================================= */
 import React, { useState, useEffect } from 'react';
-import { Icon, ProjectThumb, CatPills, TechTag, CatGlyph } from './ui.jsx';
+import { Icon, ProjectThumb, CatPills, TechTag, CatGlyph, armProjectMorph } from './ui.jsx';
 import { DATA, projCats, primaryCat } from './data.js';
 import { getProjectGalleryState } from './project-gallery.js';
+import { readStoredGalleryMode, persistGalleryMode } from './gallery-mode.js';
 import { getCaseStudyBlocks } from './case-study-renderer.js';
 import { Markdown } from './markdown-renderer.jsx';
-import { resolveImageSrc } from './config-runtime.js';
+import { resolveImageSrc, getBrowserStorage } from './config-runtime.js';
 
 function CaseStudyContent({ project }) {
   if (project?.caseStudy) return <Markdown text={project.caseStudy} className="case-article md-content" />
@@ -36,8 +37,13 @@ function CaseStudyContent({ project }) {
 }
 
 function ProjectCard({ project, onOpen }) {
+  const handleMove = (e) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty('--x', (e.clientX - r.left) + 'px');
+    e.currentTarget.style.setProperty('--y', (e.clientY - r.top) + 'px');
+  };
   return (
-    <button className="proj-card" onClick={() => onOpen(project.id)}>
+    <button className="proj-card" onClick={(e) => { armProjectMorph(e.currentTarget, project.id); onOpen(project.id); }} onMouseMove={handleMove}>
       <div style={{ position: 'relative' }}>
         {project.featured && (
           <span className="proj-card-featured"><Icon name="star" size={11} /> CV</span>
@@ -102,12 +108,54 @@ function ProjectModal({ project, onClose }) {
   );
 }
 
+function StorySection({ project, index, onOpen }) {
+  const headingId = 'story-title-' + project.id;
+  const num = String(index + 1).padStart(2, '0');
+  const primary = primaryCat(project);
+  const meta = DATA.categories[primary];
+  return (
+    <section className="story-section" aria-labelledby={headingId}>
+      <div className="story-inner">
+        <span className="story-num" aria-hidden="true">{num}</span>
+        <div className="story-head">
+          <h2 className="story-name" id={headingId}>{project.name}</h2>
+          <p className="story-meta">
+            {project.role} · {project.period}{project.duration ? ' · ' + project.duration : ''}
+          </p>
+        </div>
+        <div className="story-media">
+          {project.image
+            ? <img className="story-img" src={resolveImageSrc(project.image)} alt={project.name} loading="lazy" />
+            : (
+              <div className="story-media-ph" style={{ '--c': meta ? meta.color : 'var(--brand)' }} aria-hidden="true">
+                <Icon name={meta ? meta.glyph : 'code'} size={44} />
+              </div>
+            )}
+        </div>
+        <div className="story-foot">
+          <div className="story-techs">
+            {project.techs.slice(0, 4).map((t, i) => <TechTag key={i} label={t.label} tech={t.tech} color={t.color} />)}
+          </div>
+          <button className="story-cta" onClick={(e) => { armProjectMorph(e.currentTarget.closest('.story-inner'), project.id); onOpen(project.id); }}>
+            Voir le projet <Icon name="arrowRight" size={17} />
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function ProjectsView({ navigate, openProject, filter, setFilter, sort, setSort }) {
   const { projects, categories } = DATA;
   const visibleProjects = projects.filter(p => p.visible !== false);
   const { counts, catKeys, activeFilter, shown } = getProjectGalleryState({ projects: visibleProjects, categories, filter, sort });
   const [filterOpen, setFilterOpen] = useState(false);
+  const [galleryMode, setGalleryMode] = useState(() => readStoredGalleryMode(getBrowserStorage(globalThis)));
   const handleFilter = (k) => { setFilter(k); setFilterOpen(false); };
+  const handleMode = (mode) => {
+    setGalleryMode(mode);
+    persistGalleryMode(getBrowserStorage(globalThis), mode);
+  };
 
   const sortBy = sort === 'recent' || sort === 'oldest' ? 'date' : sort === 'az' || sort === 'za' ? 'name' : 'default'
   const sortAsc = sort === 'oldest' || sort === 'az'
@@ -169,10 +217,38 @@ function ProjectsView({ navigate, openProject, filter, setFilter, sort, setSort 
         </div>
       </div>
 
-      <div className="proj-gallery">
-        {shown.map((p) => <ProjectCard key={p.id} project={p} onOpen={openProject} />)}
-        {shown.length === 0 && <div className="gallery-empty">Aucun projet dans cette catégorie pour l'instant.</div>}
+      <div className="gallery-mode-bar">
+        <div className="mode-toggle" role="group" aria-label="Mode d'affichage des projets">
+          <button
+            type="button"
+            className={'mode-toggle-btn' + (galleryMode === 'stories' ? ' active' : '')}
+            aria-pressed={galleryMode === 'stories'}
+            onClick={() => handleMode('stories')}
+          >
+            Stories
+          </button>
+          <button
+            type="button"
+            className={'mode-toggle-btn' + (galleryMode === 'index' ? ' active' : '')}
+            aria-pressed={galleryMode === 'index'}
+            onClick={() => handleMode('index')}
+          >
+            Index
+          </button>
+        </div>
       </div>
+
+      {galleryMode === 'stories' ? (
+        <div className="story-list">
+          {shown.map((p, i) => <StorySection key={p.id} project={p} index={i} onOpen={openProject} />)}
+          {shown.length === 0 && <div className="gallery-empty">Aucun projet dans cette catégorie pour l'instant.</div>}
+        </div>
+      ) : (
+        <div className="proj-gallery">
+          {shown.map((p) => <ProjectCard key={p.id} project={p} onOpen={openProject} />)}
+          {shown.length === 0 && <div className="gallery-empty">Aucun projet dans cette catégorie pour l'instant.</div>}
+        </div>
+      )}
     </main>
   );
 }
@@ -195,20 +271,28 @@ function ProjectDetailView({ id, navigate, openProject }) {
   const next = projects[(idx + 1) % projects.length];
 
   return (
-    <main className="page-wrap">
+    // T05: the detail page is signed by its primary category color.
+    // --detail-accent drives every tinted accent (hero edge, header pills,
+    // featured badge, title glyph, next-project handover); --c feeds the
+    // hero thumbnail gradient. The rest of the page stays zinc/neutral.
+    <main className="page-wrap" style={{ '--detail-accent': cat.color, '--c': cat.color }}>
       <button className="back-link" onClick={() => navigate('/projets')}><Icon name="arrowLeft" size={16} /> Tous les projets</button>
 
       <header className="pd-head">
         <div className="pd-head-top">
-          <CatPills project={project} />
+          <CatPills project={project} accent />
           {project.featured && <span className="pd-featured"><Icon name="star" size={12} /> Mis en avant sur le CV</span>}
         </div>
-        <h1 className="pd-title">{project.name}</h1>
+        <h1 className="pd-title">
+          <span className="pd-title-glyph" aria-hidden="true"><Icon name={cat.glyph} size={30} /></span>
+          {project.name}
+        </h1>
         <p className="pd-lead">{project.description}</p>
       </header>
 
-      <div className="pd-hero" style={{ '--c': cat.color }}>
-        <ProjectThumb project={project} ratio="16 / 7" />
+      {/* T04: persistent vt-proj-<id> name so the armed thumbnail morphs into this hero */}
+      <div className="pd-hero">
+        <ProjectThumb project={project} ratio="16 / 7" vt={'vt-proj-' + project.id} />
       </div>
 
       <div className="pd-body">
@@ -239,7 +323,14 @@ function ProjectDetailView({ id, navigate, openProject }) {
         </aside>
       </div>
 
-      <button className="pd-next" onClick={() => openProject(next.id)}>
+      {/* T04/T05: rename the outgoing hero to the NEXT project's vt name so
+          detail → next-project morphs (same name on both snapshots) instead
+          of crossfading two differently-named heroes. */}
+      <button className="pd-next" onClick={(e) => {
+        const heroThumb = e.currentTarget.closest('main')?.querySelector('.pd-hero .thumb');
+        if (heroThumb) heroThumb.style.viewTransitionName = 'vt-proj-' + next.id;
+        openProject(next.id);
+      }}>
         <span className="pd-next-k">Projet suivant</span>
         <span className="pd-next-v"><CatGlyph cat={primaryCat(next)} size={16} /> {next.name} <Icon name="arrowRight" size={18} /></span>
       </button>

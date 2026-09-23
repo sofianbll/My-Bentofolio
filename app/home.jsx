@@ -2,9 +2,29 @@
    BENTOFOLIO — Home (Bento) page (ES module)
    ============================================= */
 import React from 'react';
-import { Icon, Cell, Chip, SectionTitle, TechTag, CatGlyph, Badge, ProjectThumb } from './ui.jsx';
+import { Icon, Cell, Chip, SectionTitle, TechTag, CatGlyph, Badge, ProjectThumb, armProjectMorph } from './ui.jsx';
 import { DATA, APP_CONFIG, primaryCat } from './data.js';
 import { resolveImageSrc } from './config-runtime.js';
+
+function CountUp({ value }) {
+  const [display, setDisplay] = React.useState(value);
+  React.useEffect(() => {
+    const reduce = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || !Number.isFinite(value)) { setDisplay(value); return; }
+    setDisplay(0);
+    const start = performance.now();
+    const dur = 900;
+    let raf;
+    const tick = (t) => {
+      const k = Math.min(1, (t - start) / dur);
+      setDisplay(Math.round(value * (1 - Math.pow(1 - k, 3))));
+      if (k < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [value]);
+  return <strong>{display}</strong>;
+}
 
 function HomeView({ navigate, openProject }) {
   const { personalInfo: p, contactInfos, socialLinks, skillGroups, formations, interests, projects } = DATA;
@@ -12,6 +32,9 @@ function HomeView({ navigate, openProject }) {
   const homeFeaturedProjects = visibleProjects.filter(p => p.homeFeatured);
   const preview = (homeFeaturedProjects.length > 0 ? homeFeaturedProjects : visibleProjects).slice(0, 4);
   const contactIcon = { 'Âge': 'star', 'Localisation': 'pin', 'Téléphone': 'phone', 'Email': 'mail' };
+  // Hero entrance reveal (T02): per-line mask reveal, CSS-only, gated
+  // via prefers-reduced-motion / html.is-preview in components.css.
+  const reveal = (delay) => ({ '--reveal-delay': delay });
 
   return (
     <main className="page-wrap">
@@ -25,9 +48,13 @@ function HomeView({ navigate, openProject }) {
               </Chip>
             ))}
           </div>
-          <h1 className="hero-name">{p.firstName}<br />{p.lastName}</h1>
-          <p className="hero-role">{p.role}</p>
-          <div className="hero-meta">
+          <h1 className="hero-name">
+            <span className="hero-reveal" style={reveal('0.10s')}><span className="hero-reveal-inner">{p.firstName}</span></span>
+            <span className="hero-reveal" style={reveal('0.22s')}><span className="hero-reveal-inner hero-name-accent">{p.lastName}</span></span>
+          </h1>
+          <p className="hero-role hero-reveal" style={reveal('0.34s')}><span className="hero-reveal-inner">{p.role}</span></p>
+          <div className="hero-meta hero-reveal" style={reveal('0.46s')}>
+            <span className="hero-reveal-inner">
             {DATA.profile?.webExperienceSince ? (
               <span><Icon name="star" size={12} /> {new Date().getFullYear() - DATA.profile.webExperienceSince} ans d'expérience</span>
             ) : (
@@ -37,12 +64,13 @@ function HomeView({ navigate, openProject }) {
             <span><strong>{p.alternance.duration}</strong></span>
             <span className="meta-sep">·</span>
             <span><strong>{p.alternance.rythme}</strong></span>
+            </span>
           </div>
           <p className="hero-bio">{p.bio}</p>
           <div className="hero-stats">
-            {visibleProjects.length > 0 && <span><Icon name="grid" size={14} /> <strong>{visibleProjects.length}</strong> projets</span>}
-            {(DATA.experiences || []).length > 0 && <span><Icon name="briefcase" size={14} /> <strong>{(DATA.experiences || []).length}</strong> expériences</span>}
-            {DATA.profile?.webExperienceSince && <span><Icon name="star" size={14} /> <strong>{new Date().getFullYear() - DATA.profile.webExperienceSince} ans</strong> d'expérience</span>}
+            {visibleProjects.length > 0 && <span><Icon name="grid" size={14} /> <CountUp value={visibleProjects.length} /> projets</span>}
+            {(DATA.experiences || []).length > 0 && <span><Icon name="briefcase" size={14} /> <CountUp value={(DATA.experiences || []).length} /> expériences</span>}
+            {DATA.profile?.webExperienceSince && <span><Icon name="star" size={14} /> <CountUp value={new Date().getFullYear() - DATA.profile.webExperienceSince} /> ans d'expérience</span>}
           </div>
           <div className="hero-actions">
             <button className="btn btn--brand" onClick={() => navigate('/contact')}>
@@ -141,7 +169,7 @@ function HomeView({ navigate, openProject }) {
           </div>
           <div className="proj-preview-grid">
             {preview.map((pr) => (
-              <button className="proj-mini" key={pr.id} onClick={() => openProject(pr.id)}>
+              <button className="proj-mini" key={pr.id} onClick={(e) => { armProjectMorph(e.currentTarget, pr.id); openProject(pr.id); }}>
                 {APP_CONFIG.appearance?.homeShowProjectImages && <ProjectThumb project={pr} ratio="16 / 7" />}
                 <div className="proj-mini-top">
                   <span className="proj-mini-name"><CatGlyph cat={primaryCat(pr)} size={15} /> {pr.name}</span>
