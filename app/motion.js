@@ -69,21 +69,50 @@ export function initSmoothScroll() {
   };
 }
 
+/* ─── Route transitions (T04, ADR-0001) ─── */
+
 /**
- * Stub route transition (Ticket 04 wires real morphing).
- * Gated through resolveMotionMode so T04 only swaps the commit wrapper.
- * @returns {'full'|'reduced'|'off'} the resolved motion mode
+ * Pure decision: does this route change get a View Transition or an
+ * instant swap? Only 'full' mode with native support may transition.
+ * @returns {'transition'|'instant'}
  */
-export function startRouteTransition(documentRef, commit) {
-  const root = documentRef || (typeof document !== 'undefined' ? document : null);
-  const mode = resolveMotionMode({
+export function planRouteTransition({ mode, hasViewTransition }) {
+  return mode === 'full' && hasViewTransition ? 'transition' : 'instant';
+}
+
+/**
+ * Detects the motion mode against a live (or mocked) document.
+ * Single source of truth shared by startRouteTransition and the app shell.
+ * @returns {'full'|'reduced'|'off'}
+ */
+export function detectMotionMode(root) {
+  return resolveMotionMode({
     isPreviewFrame: root?.documentElement?.classList?.contains('is-preview') ?? false,
     reducedMotion: typeof matchMedia === 'function'
       ? matchMedia('(prefers-reduced-motion: reduce)').matches
       : false,
     viewTransitionsSupported: typeof root?.startViewTransition === 'function',
   });
-  // T04: when mode === 'full', wrap commit in root.startViewTransition().
+}
+
+/**
+ * Runs `commit` (the actual DOM/route swap) inside a View Transition
+ * when the resolved mode allows it, otherwise runs it instantly.
+ * Robust: if startViewTransition throws, commit still runs so navigation
+ * can never be blocked by the animation layer.
+ * @returns {'full'|'reduced'|'off'} the resolved motion mode
+ */
+export function startRouteTransition(documentRef, commit) {
+  const root = documentRef || (typeof document !== 'undefined' ? document : null);
+  const mode = detectMotionMode(root);
+  if (planRouteTransition({ mode, hasViewTransition: typeof root?.startViewTransition === 'function' }) === 'transition') {
+    try {
+      root.startViewTransition(commit);
+      return mode;
+    } catch (error) {
+      // VT failed to start: fall through to an instant commit.
+    }
+  }
   commit();
   return mode;
 }

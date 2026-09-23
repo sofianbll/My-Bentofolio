@@ -150,13 +150,16 @@ function CatPills({ project, max }) {
   );
 }
 
-/* ─── PROJECT THUMBNAIL (placeholder) ─── */
-function ProjectThumb({ project, ratio = '16 / 10' }) {
+/* ─── PROJECT THUMBNAIL (placeholder) ───
+   T04: pass `vt` to pin a view-transition-name on this thumbnail. Grid
+   thumbs stay unnamed (INP budget: no extra layers) — the name is armed
+   on the clicked element only, just before navigation. */
+function ProjectThumb({ project, ratio = '16 / 10', vt }) {
   const primary = primaryCat(project);
   const meta = DATA.categories[primary];
   const c = meta ? meta.color : 'var(--brand)';
   return (
-    <div className="thumb" style={{ '--c': c, aspectRatio: ratio }}>
+    <div className="thumb" style={{ '--c': c, aspectRatio: ratio, ...(vt ? { viewTransitionName: vt } : null) }}>
       {project.image
         ? <img src={resolveImageSrc(project.image)} alt={project.name} className="thumb-img" />
         : (
@@ -169,6 +172,17 @@ function ProjectThumb({ project, ratio = '16 / 10' }) {
   );
 }
 
+/**
+ * T04: arms the morphing source inside `scope` right before navigation so
+ * the clicked thumbnail morphs into the detail hero (same vt-proj-<id>).
+ * @param {HTMLElement} scope element containing a .thumb / .story-img / .story-media-ph
+ * @param {string} projectId
+ */
+function armProjectMorph(scope, projectId) {
+  const media = scope?.querySelector('.thumb, .story-img, .story-media-ph');
+  if (media) media.style.viewTransitionName = 'vt-proj-' + projectId;
+}
+
 /* ─── INFO TOOLTIP ─── */
 function InfoTip({ text }) {
   return (
@@ -178,4 +192,4 @@ function InfoTip({ text }) {
   );
 }
 
-export { Icon, Badge, Chip, TechTag, SectionTitle, Cell, CatGlyph, CatPill, CatPills, ProjectThumb, InfoTip };
+export { Icon, Badge, Chip, TechTag, SectionTitle, Cell, CatGlyph, CatPill, CatPills, ProjectThumb, InfoTip, armProjectMorph };

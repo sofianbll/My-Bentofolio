@@ -2,7 +2,7 @@
    BENTOFOLIO — Home (Bento) page (ES module)
    ============================================= */
 import React from 'react';
-import { Icon, Cell, Chip, SectionTitle, TechTag, CatGlyph, Badge, ProjectThumb } from './ui.jsx';
+import { Icon, Cell, Chip, SectionTitle, TechTag, CatGlyph, Badge, ProjectThumb, armProjectMorph } from './ui.jsx';
 import { DATA, APP_CONFIG, primaryCat } from './data.js';
 import { resolveImageSrc } from './config-runtime.js';
 
@@ -169,7 +169,7 @@ function HomeView({ navigate, openProject }) {
           </div>
           <div className="proj-preview-grid">
             {preview.map((pr) => (
-              <button className="proj-mini" key={pr.id} onClick={() => openProject(pr.id)}>
+              <button className="proj-mini" key={pr.id} onClick={(e) => { armProjectMorph(e.currentTarget, pr.id); openProject(pr.id); }}>
                 {APP_CONFIG.appearance?.homeShowProjectImages && <ProjectThumb project={pr} ratio="16 / 7" />}
                 <div className="proj-mini-top">
                   <span className="proj-mini-name"><CatGlyph cat={primaryCat(pr)} size={15} /> {pr.name}</span>

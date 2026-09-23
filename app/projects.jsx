@@ -2,7 +2,7 @@
    BENTOFOLIO — Projects gallery + detail modal (ES module)
    ============================================= */
 import React, { useState, useEffect } from 'react';
-import { Icon, ProjectThumb, CatPills, TechTag, CatGlyph } from './ui.jsx';
+import { Icon, ProjectThumb, CatPills, TechTag, CatGlyph, armProjectMorph } from './ui.jsx';
 import { DATA, projCats, primaryCat } from './data.js';
 import { getProjectGalleryState } from './project-gallery.js';
 import { readStoredGalleryMode, persistGalleryMode } from './gallery-mode.js';
@@ -43,7 +43,7 @@ function ProjectCard({ project, onOpen }) {
     e.currentTarget.style.setProperty('--y', (e.clientY - r.top) + 'px');
   };
   return (
-    <button className="proj-card" onClick={() => onOpen(project.id)} onMouseMove={handleMove}>
+    <button className="proj-card" onClick={(e) => { armProjectMorph(e.currentTarget, project.id); onOpen(project.id); }} onMouseMove={handleMove}>
       <div style={{ position: 'relative' }}>
         {project.featured && (
           <span className="proj-card-featured"><Icon name="star" size={11} /> CV</span>
@@ -136,7 +136,7 @@ function StorySection({ project, index, onOpen }) {
           <div className="story-techs">
             {project.techs.slice(0, 4).map((t, i) => <TechTag key={i} label={t.label} tech={t.tech} color={t.color} />)}
           </div>
-          <button className="story-cta" onClick={() => onOpen(project.id)}>
+          <button className="story-cta" onClick={(e) => { armProjectMorph(e.currentTarget.closest('.story-inner'), project.id); onOpen(project.id); }}>
             Voir le projet <Icon name="arrowRight" size={17} />
           </button>
         </div>
@@ -284,7 +284,8 @@ function ProjectDetailView({ id, navigate, openProject }) {
       </header>
 
       <div className="pd-hero" style={{ '--c': cat.color }}>
-        <ProjectThumb project={project} ratio="16 / 7" />
+        {/* T04: persistent vt-proj-<id> name so the armed thumbnail morphs into this hero */}
+        <ProjectThumb project={project} ratio="16 / 7" vt={'vt-proj-' + project.id} />
       </div>
 
       <div className="pd-body">

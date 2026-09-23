@@ -12,7 +12,7 @@ import { CvView } from './cv.jsx';
 import { ContactView } from './contact.jsx';
 import { APP_CONFIG } from './data.js';
 import { OverlayMenu } from './overlay-menu.jsx';
-import { resolveMotionMode, initSmoothScroll, reduceScrollDirection, shouldHideNav } from './motion.js';
+import { resolveMotionMode, initSmoothScroll, reduceScrollDirection, shouldHideNav, startRouteTransition, detectMotionMode } from './motion.js';
 
 const AdminView = import.meta.env.DEV
   ? React.lazy(() => import('./admin.jsx').then(m => ({ default: m.AdminView })))
@@ -223,7 +223,14 @@ function App() {
   }, [tweaks]);
 
   useEffect(() => {
-    const onHash = () => {setRoute(parseHash());window.scrollTo(0, 0);};
+    const onHash = () => {
+      // A route change already applied synchronously inside the View
+      // Transition callback (see requestRouteTransition) will fire a
+      // duplicate hashchange a tick later: swallow it once.
+      if (skipNextHash.current) { skipNextHash.current = false; return; }
+      setRoute(parseHash());
+      window.scrollTo(0, 0);
+    };
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
@@ -251,12 +258,31 @@ function App() {
     safeStorage.set(THEME_KEY, theme);
   }, [theme]);
 
+  // T04 (ADR-0001): route changes morph via document.startViewTransition
+  // in 'full' mode. The setState + hash write happen synchronously inside
+  // the VT callback so the old DOM is captured before, the new one after.
+  // In 'off'/'reduced' mode (or towards /admin) the hash write is plain and
+  // the hashchange listener applies the route, exactly as before T04.
+  const skipNextHash = useRef(false);
+  const requestRouteTransition = useCallback((path) => {
+    if (path === '/admin' || detectMotionMode(document) !== 'full') {
+      location.hash = '#' + path;
+      return;
+    }
+    startRouteTransition(document, () => {
+      skipNextHash.current = true; // the hashchange from this write is a duplicate
+      location.hash = '#' + path;
+      setRoute(path);
+      window.scrollTo(0, 0); // inside the callback so the scroll animates with the transition
+    });
+  }, []);
+
   const navigate = useCallback((path) => {
     if (parseHash() === path) {window.scrollTo(0, 0);return;}
-    location.hash = '#' + path;
-  }, []);
+    requestRouteTransition(path);
+  }, [requestRouteTransition]);
   const toggleTheme = () => setTheme((t) => t === 'light' ? 'dark' : 'light');
-  const openProject = (id) => {location.hash = '#/projet/' + id;};
+  const openProject = (id) => requestRouteTransition('/projet/' + id);
   const showToast = (msg) => {
     setToast(msg);
     clearTimeout(window.__toastT);

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { reduceScrollDirection, shouldHideNav, resolveMotionMode, startRouteTransition, shouldAnimateHero } from './motion.js'
+import { reduceScrollDirection, shouldHideNav, resolveMotionMode, startRouteTransition, shouldAnimateHero, planRouteTransition } from './motion.js'
 
 describe('reduceScrollDirection', () => {
   test('clear downward movement beyond threshold returns down', () => {
@@ -103,28 +103,93 @@ describe('shouldAnimateHero', () => {
   })
 })
 
-describe('startRouteTransition', () => {
-  test('stub calls commit synchronously and reports the motion mode', () => {
-    let committed = false
-    const docRef = {
-      documentElement: { classList: { contains: () => false } },
-      startViewTransition: () => ({}),
-    }
-    const mode = startRouteTransition(docRef, () => { committed = true })
-
-    expect(committed).toBe(true)
-    expect(mode).toBe('full')
+describe('planRouteTransition', () => {
+  test('full mode with native support plans a transition', () => {
+    expect(planRouteTransition({ mode: 'full', hasViewTransition: true })).toBe('transition')
   })
 
-  test('stub still commits instantly in off mode (preview / reduced motion)', () => {
-    let committed = false
-    const docRef = {
-      documentElement: { classList: { contains: () => true } },
-      startViewTransition: undefined,
-    }
-    const mode = startRouteTransition(docRef, () => { committed = true })
+  test('full mode without support falls back to an instant swap', () => {
+    expect(planRouteTransition({ mode: 'full', hasViewTransition: false })).toBe('instant')
+  })
 
+  test('reduced mode always swaps instantly', () => {
+    expect(planRouteTransition({ mode: 'reduced', hasViewTransition: true })).toBe('instant')
+  })
+
+  test('off mode always swaps instantly', () => {
+    expect(planRouteTransition({ mode: 'off', hasViewTransition: true })).toBe('instant')
+  })
+})
+
+describe('startRouteTransition', () => {
+  function makeDoc({ preview = false, hasViewTransition = true, throwOnVT = false } = {}) {
+    const calls = { vtCalls: 0, commitRanInsideVT: false }
+    const doc = {
+      documentElement: { classList: { contains: () => preview } },
+    }
+    if (hasViewTransition) {
+      doc.startViewTransition = (cb) => {
+        calls.vtCalls += 1
+        if (throwOnVT) throw new Error('VT unavailable')
+        calls.commitRanInsideVT = true
+        cb()
+        return { finished: Promise.resolve() }
+      }
+    }
+    return { doc, calls }
+  }
+
+  test('full mode runs commit inside startViewTransition', () => {
+    let committed = false
+    const { doc, calls } = makeDoc()
+    const mode = startRouteTransition(doc, () => { committed = true })
+
+    expect(mode).toBe('full')
+    expect(calls.vtCalls).toBe(1)
+    expect(calls.commitRanInsideVT).toBe(true)
     expect(committed).toBe(true)
+  })
+
+  test('commit runs synchronously even when wrapped (navigation never blocks)', () => {
+    let committed = false
+    const { doc } = makeDoc()
+    startRouteTransition(doc, () => { committed = true })
+    expect(committed).toBe(true)
+  })
+
+  test('off mode (preview frame) commits instantly and never calls startViewTransition', () => {
+    let committed = false
+    const { doc, calls } = makeDoc({ preview: true })
+    const mode = startRouteTransition(doc, () => { committed = true })
+
     expect(mode).toBe('off')
+    expect(calls.vtCalls).toBe(0)
+    expect(committed).toBe(true)
+  })
+
+  test('reduced mode (no VT support) commits instantly', () => {
+    let committed = false
+    const { doc, calls } = makeDoc({ hasViewTransition: false })
+    const mode = startRouteTransition(doc, () => { committed = true })
+
+    expect(mode).toBe('reduced')
+    expect(calls.vtCalls).toBe(0)
+    expect(committed).toBe(true)
+  })
+
+  test('startViewTransition throwing still commits the route change', () => {
+    let committed = false
+    const { doc } = makeDoc({ throwOnVT: true })
+    const mode = startRouteTransition(doc, () => { committed = true })
+
+    expect(mode).toBe('full')
+    expect(committed).toBe(true)
+  })
+
+  test('document without VT support reports reduced and commits instantly', () => {
+    let committed = false
+    const mode = startRouteTransition({}, () => { committed = true })
+    expect(mode).toBe('reduced')
+    expect(committed).toBe(true)
   })
 })

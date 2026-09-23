@@ -467,3 +467,105 @@ test.describe('Projets Stories/Index (T03)', () => {
     expect(filteredCards).toBe(filteredStories);
   });
 });
+
+test.describe('View Transitions (T04)', () => {
+  // Instrumentation partagée : compte les vrais appels à document.startViewTransition.
+  const VT_COUNTER_INIT = () => {
+    window.__vtCalls = 0;
+    const original = Document.prototype.startViewTransition;
+    if (original) {
+      Document.prototype.startViewTransition = function (cb) {
+        window.__vtCalls += 1;
+        return original.call(this, cb);
+      };
+    }
+  };
+
+  test('home → projets → détail → retour runs with zero console errors', async ({ page }) => {
+    const errors = [];
+    page.on('console', (msg) => { if (msg.type() === 'error') errors.push(msg.text()); });
+    page.on('pageerror', (error) => errors.push(error.message));
+
+    await page.goto(BASE + '/index.html#/');
+    await page.waitForSelector('.navbar', { timeout: 5000 });
+
+    await page.locator('.nav-link').filter({ hasText: 'Projets' }).click();
+    await page.waitForSelector('.story-section', { timeout: 5000 });
+
+    await page.locator('.story-cta').first().click();
+    await page.waitForSelector('.pd-hero', { timeout: 5000 });
+    await expect(page.locator('.pd-title')).toBeVisible();
+
+    await page.locator('.back-link').click();
+    await page.waitForSelector('.story-section', { timeout: 5000 });
+
+    // let any late async noise surface before asserting
+    await page.waitForTimeout(400);
+    expect(errors).toEqual([]);
+  });
+
+  test('clicking a project from home reaches the detail and calls startViewTransition', async ({ page }) => {
+    await page.addInitScript(VT_COUNTER_INIT);
+    await page.goto(BASE + '/index.html#/');
+    await page.waitForSelector('.proj-mini', { timeout: 5000 });
+
+    await page.locator('.proj-mini').first().click();
+    await page.waitForSelector('.pd-hero', { timeout: 5000 });
+    await expect(page.locator('.pd-title')).toBeVisible();
+
+    // the hero carries the morphing name matching the clicked project
+    const vtName = await page.locator('.pd-hero .thumb').evaluate(el => getComputedStyle(el).viewTransitionName);
+    expect(vtName).toMatch(/^vt-proj-/);
+
+    const calls = await page.evaluate(() => window.__vtCalls);
+    expect(calls).toBeGreaterThanOrEqual(1);
+  });
+
+  test('detail → next project keeps morphing (hero has a per-project vt name)', async ({ page }) => {
+    await page.addInitScript(VT_COUNTER_INIT);
+    await page.goto(BASE + '/index.html#/projets');
+    await page.waitForSelector('.story-section', { timeout: 5000 });
+
+    await page.locator('.story-cta').first().click();
+    await page.waitForSelector('.pd-hero', { timeout: 5000 });
+
+    const firstTitle = await page.locator('.pd-title').textContent();
+    const firstHash = await page.evaluate(() => location.hash);
+    await page.locator('.pd-next').click();
+    // .pd-hero exists on both pages: wait for the route itself to change
+    await page.waitForFunction((h) => location.hash !== h, firstHash, { timeout: 5000 });
+    await page.waitForSelector('.pd-hero', { timeout: 5000 });
+
+    const secondTitle = await page.locator('.pd-title').textContent();
+    expect(secondTitle).not.toBe(firstTitle);
+    const vtName = await page.locator('.pd-hero .thumb').evaluate(el => getComputedStyle(el).viewTransitionName);
+    expect(vtName).toMatch(/^vt-proj-/);
+
+    const calls = await page.evaluate(() => window.__vtCalls);
+    expect(calls).toBeGreaterThanOrEqual(2);
+  });
+
+  test.describe('reduced motion', () => {
+    // Explicit context: test.use({ reducedMotion }) is not reliably applied
+    // inside a nested describe with this Playwright version.
+    test('navigation is correct and startViewTransition is never called', async ({ browser }) => {
+      const context = await browser.newContext({ reducedMotion: 'reduce' });
+      const page = await context.newPage();
+      await page.addInitScript(VT_COUNTER_INIT);
+
+      await page.goto(BASE + '/index.html#/');
+      await page.waitForSelector('.navbar', { timeout: 5000 });
+
+      await page.locator('.nav-link').filter({ hasText: 'Projets' }).click();
+      await page.waitForSelector('.story-section', { timeout: 5000 });
+
+      await page.locator('.story-cta').first().click();
+      await page.waitForSelector('.pd-hero', { timeout: 5000 });
+      await expect(page.locator('.pd-title')).toBeVisible();
+
+      const calls = await page.evaluate(() => window.__vtCalls);
+      expect(calls).toBe(0);
+      await context.close();
+    });
+  });
+});

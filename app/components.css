@@ -15,6 +15,24 @@
 @keyframes viewIn { from { opacity: 0; transform: translateY(12px); } }
 @media (prefers-reduced-motion: reduce) { .view-anim { animation: none; } }
 
+/* ─── VIEW TRANSITIONS MORPHING (T04, ADR-0001) ───
+   Sobre par design : un léger crossfade global (root), et le morphing ne
+   s'applique QUE sur les paires nommées vt-proj-<id> (thumb cliquée → hero
+   détail), qui gardent le comportement natif du navigateur. Rien sur la nav.
+   Le JS ne lance jamais startViewTransition sous prefers-reduced-motion ni
+   en preview (html.is-preview) ; la garde CSS ci-dessous est le filet de sécurité. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 300ms;
+  animation-timing-function: var(--ease);
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
 /* ─── NAVBAR ─── */
 .navbar {
   position: fixed; top: var(--s3); left: 50%; transform: translateX(-50%);
