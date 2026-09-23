@@ -462,12 +462,21 @@ html.is-preview .story-inner { animation: none; opacity: 1; transform: none; }
 .back-link:hover { color: var(--text); gap: 9px; }
 
 /* ─── PROJECT DETAIL PAGE ─── */
+/* T05 (ADR-0001 "sobre pero cinétique"): the detail page is SIGNED by its
+   primary category color via --detail-accent (set on the page <main>).
+   Tinted accents only — hero edge, header pills, featured badge, title
+   glyph, next-project handover. The rest stays zinc/neutral. */
 .pd-head { margin-bottom: var(--s5); }
+.pd-head .cat-pill { --c: var(--detail-accent); }
 .pd-head-top { display: flex; align-items: center; gap: var(--s3); margin-bottom: var(--s4); }
-.pd-featured { display: inline-flex; align-items: center; gap: 5px; font-size: var(--text-xs); font-weight: 700; color: var(--cat-logo); }
+.pd-featured { display: inline-flex; align-items: center; gap: 5px; font-size: var(--text-xs); font-weight: 700; color: var(--detail-accent); }
 .pd-title { font-family: var(--font-display); font-size: clamp(38px, 6vw, 64px); font-weight: 800; letter-spacing: var(--tracking-tight); line-height: 1.02; }
+.pd-title-glyph { display: inline-flex; margin-right: var(--s3); color: var(--detail-accent); transform: translateY(3px); }
 .pd-lead { font-size: var(--text-xl); color: var(--text-2); margin-top: var(--s3); max-width: 62ch; line-height: var(--leading-snug); }
-.pd-hero { margin-bottom: var(--s8); border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border); }
+.pd-hero {
+  margin-bottom: var(--s8); border-radius: var(--radius-lg); overflow: hidden;
+  border: 1px solid color-mix(in oklab, var(--detail-accent) 32%, var(--border));
+}
 .pd-hero .thumb { border-radius: 0; border: none; }
 .pd-body { display: grid; grid-template-columns: 1fr; gap: var(--s8); }
 @media (min-width: 900px) { .pd-body { grid-template-columns: 1fr 300px; gap: var(--s10); } }
@@ -519,16 +528,33 @@ html.is-preview .story-inner { animation: none; opacity: 1; transform: none; }
 .pd-techs { display: flex; flex-wrap: wrap; gap: 6px; }
 .pd-actions { display: flex; flex-direction: column; gap: var(--s2); }
 .pd-actions .btn { justify-content: center; }
+/* T05: next-project handover — full-width block signed by --detail-accent.
+   Kicker, border, arrow tint on hover/active; generous padding, sober lift. */
 .pd-next {
   margin-top: var(--s10); width: 100%; display: flex; flex-direction: column; gap: var(--s2);
-  padding: var(--s6); border: 1px solid var(--border); border-radius: var(--radius-lg);
-  background: var(--bg-card); transition: border-color var(--dur) var(--ease), transform 0.3s var(--ease);
+  padding: var(--s7) var(--s6); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  background: var(--bg-card); text-align: left;
+  transition: border-color var(--dur) var(--ease), background-color var(--dur) var(--ease), transform 0.3s var(--ease);
 }
-.pd-next:hover { border-color: var(--text-2); transform: translateY(-2px); }
-.pd-next-k { font-size: var(--text-sm); color: var(--text-2); text-transform: uppercase; letter-spacing: var(--tracking-wide); font-weight: 700; }
+.pd-next:hover, .pd-next:active {
+  border-color: color-mix(in oklab, var(--detail-accent) 45%, var(--border));
+  background: color-mix(in oklab, var(--detail-accent) 7%, var(--bg-card));
+  transform: translateY(-2px);
+}
+.pd-next:focus-visible { outline-color: color-mix(in oklab, var(--detail-accent) 70%, transparent); }
+.pd-next-k { font-size: var(--text-sm); color: var(--text-2); text-transform: uppercase; letter-spacing: var(--tracking-wide); font-weight: 700; transition: color var(--dur) var(--ease); }
+.pd-next:hover .pd-next-k, .pd-next:active .pd-next-k { color: var(--detail-accent); }
 .pd-next-v { display: flex; align-items: center; gap: var(--s2); font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 800; letter-spacing: var(--tracking-snug); }
-.pd-next-v svg:last-child { margin-left: auto; transition: transform 0.3s var(--ease); }
-.pd-next:hover .pd-next-v svg:last-child { transform: translateX(4px); }
+.pd-next-v svg:last-child { margin-left: auto; transition: transform 0.3s var(--ease), color var(--dur) var(--ease); }
+.pd-next:hover .pd-next-v svg:last-child { transform: translateX(4px); color: var(--detail-accent); }
+/* Gating (ADR-0001): hover lift and arrow slide off under reduced motion / preview */
+@media (prefers-reduced-motion: reduce) {
+  .pd-next, .pd-next-k, .pd-next-v svg:last-child { transition: none; }
+  .pd-next:hover, .pd-next:active { transform: none; }
+  .pd-next:hover .pd-next-v svg:last-child, .pd-next:active .pd-next-v svg:last-child { transform: none; }
+}
+html.is-preview .pd-next, html.is-preview .pd-next-k, html.is-preview .pd-next-v svg:last-child { transition: none; }
+html.is-preview .pd-next:hover, html.is-preview .pd-next:active { transform: none; }
 
 .nav-admin-badge {
   display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px;

@@ -569,3 +569,103 @@ test.describe('View Transitions (T04)', () => {
     });
   });
 });
+
+test.describe('Détail teinté (T05)', () => {
+  // Two visible projects whose PRIMARY categories differ (dev #6366f1 vs
+  // devops #06b6d4, theme-independent tokens from styles.css).
+  const TINTED = [
+    { id: 'connect-in', color: '#6366f1' },
+    { id: 'jeuvideops', color: '#06b6d4' },
+  ];
+
+  const probeDetail = () => {
+    const main = document.querySelector('.page-wrap');
+    const hero = document.querySelector('.pd-hero');
+    const pill = document.querySelector('.pd-head .cat-pill');
+    return {
+      accent: getComputedStyle(main).getPropertyValue('--detail-accent').trim(),
+      heroBorder: getComputedStyle(hero).borderTopColor,
+      pillColor: pill ? getComputedStyle(pill).color : null,
+    };
+  };
+
+  test('detail pages are signed by their primary category color (two distinct tints)', async ({ page }) => {
+    const probes = [];
+    for (const p of TINTED) {
+      await page.goto(BASE + '/index.html#/projet/' + p.id);
+      await page.waitForSelector('.pd-hero', { timeout: 5000 });
+      await page.waitForSelector('.pd-head .cat-pill', { timeout: 5000 });
+      probes.push(await page.evaluate(probeDetail));
+    }
+
+    for (let i = 0; i < TINTED.length; i++) {
+      // --detail-accent resolves to the primary category color (var chain substituted)
+      expect(probes[i].accent.toLowerCase()).toBe(TINTED[i].color);
+      // tinted accents actually render (hero edge + header pill)
+      expect(probes[i].heroBorder).not.toBe('');
+      expect(probes[i].pillColor).not.toBe(null);
+      expect(probes[i].pillColor).toMatch(/^rgb/);
+    }
+    // the two pages carry two genuinely different tints
+    expect(probes[0].accent).not.toBe(probes[1].accent);
+    expect(probes[0].heroBorder).not.toBe(probes[1].heroBorder);
+    expect(probes[0].pillColor).not.toBe(probes[1].pillColor);
+  });
+
+  test('page base stays neutral (main background carries no tint)', async ({ page }) => {
+    await page.goto(BASE + '/index.html#/projet/connect-in');
+    await page.waitForSelector('.pd-hero', { timeout: 5000 });
+
+    const mainBg = await page.locator('.page-wrap').evaluate(el => getComputedStyle(el).backgroundColor);
+    // .page-wrap has no background of its own: the zinc/neutral page base shows through
+    expect(mainBg).toBe('rgba(0, 0, 0, 0)');
+  });
+
+  test('.pd-next is focusable and navigates to the expected next project', async ({ page }) => {
+    await page.goto(BASE + '/index.html#/projet/connect-in');
+    await page.waitForSelector('.pd-hero', { timeout: 5000 });
+
+    const nextBtn = page.locator('.pd-next');
+    await expect(nextBtn).toBeVisible();
+    await nextBtn.focus();
+    const isFocused = await page.evaluate(() =>
+      Boolean(document.activeElement && document.activeElement.classList.contains('pd-next')));
+    expect(isFocused).toBe(true);
+
+    // DATA.projects order: connect-in (idx 0) → my-cinema (idx 1)
+    const nextName = (await page.locator('.pd-next-v').innerText()).trim();
+    await nextBtn.click();
+    await page.waitForFunction(() => location.hash === '#/projet/my-cinema', null, { timeout: 5000 });
+    await page.waitForSelector('.pd-hero', { timeout: 5000 });
+    await expect(page.locator('.pd-title')).toBeVisible();
+    expect((await page.locator('.pd-title').innerText()).trim()).toBe(nextName);
+  });
+
+  test('T04 morphing intact after .pd-next click (hero of the new detail is live)', async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__vtCalls = 0;
+      const original = Document.prototype.startViewTransition;
+      if (original) {
+        Document.prototype.startViewTransition = function (cb) {
+          window.__vtCalls += 1;
+          return original.call(this, cb);
+        };
+      }
+    });
+
+    await page.goto(BASE + '/index.html#/projet/connect-in');
+    await page.waitForSelector('.pd-hero', { timeout: 5000 });
+
+    await page.locator('.pd-next').click();
+    await page.waitForFunction(() => location.hash === '#/projet/my-cinema', null, { timeout: 5000 });
+    await page.waitForSelector('.pd-hero', { timeout: 5000 });
+    await expect(page.locator('.pd-title')).toBeVisible();
+
+    // the new hero carries the per-project morphing name of the NEW project
+    const vtName = await page.locator('.pd-hero .thumb').evaluate(el => getComputedStyle(el).viewTransitionName);
+    expect(vtName).toBe('vt-proj-my-cinema');
+
+    const calls = await page.evaluate(() => window.__vtCalls);
+    expect(calls).toBeGreaterThanOrEqual(1);
+  });
+});

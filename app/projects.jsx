@@ -271,20 +271,27 @@ function ProjectDetailView({ id, navigate, openProject }) {
   const next = projects[(idx + 1) % projects.length];
 
   return (
-    <main className="page-wrap">
+    // T05: the detail page is signed by its primary category color.
+    // --detail-accent drives every tinted accent (hero edge, header pills,
+    // featured badge, title glyph, next-project handover); --c feeds the
+    // hero thumbnail gradient. The rest of the page stays zinc/neutral.
+    <main className="page-wrap" style={{ '--detail-accent': cat.color, '--c': cat.color }}>
       <button className="back-link" onClick={() => navigate('/projets')}><Icon name="arrowLeft" size={16} /> Tous les projets</button>
 
       <header className="pd-head">
         <div className="pd-head-top">
-          <CatPills project={project} />
+          <CatPills project={project} accent />
           {project.featured && <span className="pd-featured"><Icon name="star" size={12} /> Mis en avant sur le CV</span>}
         </div>
-        <h1 className="pd-title">{project.name}</h1>
+        <h1 className="pd-title">
+          <span className="pd-title-glyph" aria-hidden="true"><Icon name={cat.glyph} size={30} /></span>
+          {project.name}
+        </h1>
         <p className="pd-lead">{project.description}</p>
       </header>
 
-      <div className="pd-hero" style={{ '--c': cat.color }}>
-        {/* T04: persistent vt-proj-<id> name so the armed thumbnail morphs into this hero */}
+      {/* T04: persistent vt-proj-<id> name so the armed thumbnail morphs into this hero */}
+      <div className="pd-hero">
         <ProjectThumb project={project} ratio="16 / 7" vt={'vt-proj-' + project.id} />
       </div>
 

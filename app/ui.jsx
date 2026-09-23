@@ -128,23 +128,25 @@ function CatGlyph({ cat, size = 16 }) {
     </span>
   );
 }
-function CatPill({ cat }) {
+function CatPill({ cat, accent }) {
   const meta = DATA.categories[cat];
   if (!meta) return null;
+  // T05: `accent` tints the pill with the surrounding page's --detail-accent
+  // (used on project detail headers); default keeps each category's own color.
   return (
-    <span className="cat-pill" style={{ '--c': meta.color }}>
+    <span className="cat-pill" style={{ '--c': accent ? 'var(--detail-accent)' : meta.color }}>
       <Icon name={meta.glyph} size={13} />
       {meta.label}
     </span>
   );
 }
 /* Renders every category a project belongs to (multi-category aware) */
-function CatPills({ project, max }) {
+function CatPills({ project, max, accent }) {
   const cats = projCats(project);
   const shown = max ? cats.slice(0, max) : cats;
   return (
     <span className="cat-pills">
-      {shown.map((c) => <CatPill key={c} cat={c} />)}
+      {shown.map((c) => <CatPill key={c} cat={c} accent={accent} />)}
       {max && cats.length > max && <span className="cat-pill cat-pill--more">+{cats.length - max}</span>}
     </span>
   );
