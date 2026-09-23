@@ -13,6 +13,9 @@ test.describe('Bentofolio - Public UX', () => {
 
   test('Projects page loads with gallery', async ({ page }) => {
     await page.goto(BASE + '/index.html#/projets');
+    await page.waitForSelector('.story-section', { timeout: 5000 });
+    // Default mode is Stories; switching to Index shows the dense gallery
+    await page.locator('.mode-toggle-btn').filter({ hasText: 'Index' }).click();
     await page.waitForSelector('.proj-gallery', { timeout: 5000 });
     await expect(page.locator('.proj-card').first()).toBeVisible();
   });
@@ -20,7 +23,7 @@ test.describe('Bentofolio - Public UX', () => {
   test('Projects toolbar keeps filters and sorting in stable zones', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(BASE + '/index.html#/projets');
-    await page.waitForSelector('.proj-gallery', { timeout: 5000 });
+    await page.waitForSelector('.story-section', { timeout: 5000 });
 
     await expect(page.locator('.filter-chips')).toBeVisible();
     await expect(page.locator('.filter-actions')).toBeVisible();
@@ -65,7 +68,7 @@ test.describe('Bentofolio - Public UX', () => {
     await page.waitForSelector('.navbar', { timeout: 5000 });
 
     await page.locator('.nav-link').filter({ hasText: 'Projets' }).click();
-    await page.waitForSelector('.proj-gallery', { timeout: 5000 });
+    await page.waitForSelector('.story-section', { timeout: 5000 });
 
     await page.locator('.nav-link').filter({ hasText: 'Expériences' }).click();
     await page.waitForSelector('.page-title', { timeout: 5000 });
@@ -128,7 +131,7 @@ test.describe('Motion + Navigation', () => {
     await expect(overlay).toBeVisible();
 
     await page.locator('.menu-overlay-link').filter({ hasText: 'Projets' }).click();
-    await page.waitForSelector('.proj-gallery', { timeout: 5000 });
+    await page.waitForSelector('.story-section', { timeout: 5000 });
     await expect(overlay).toHaveCount(0);
     expect(await page.evaluate(() => location.hash)).toBe('#/projets');
   });
@@ -349,5 +352,118 @@ test.describe('Bentofolio - Preview mode', () => {
     await page.waitForSelector('.a4-page', { timeout: 5000 });
     const navDisplay = await page.locator('.navbar').evaluate(el => window.getComputedStyle(el).display);
     expect(navDisplay).toBe('none');
+  });
+});
+
+test.describe('Projets Stories/Index (T03)', () => {
+  test('First visit defaults to Stories mode', async ({ page }) => {
+    await page.goto(BASE + '/index.html#/projets');
+    await page.waitForSelector('.story-section', { timeout: 5000 });
+
+    const storyCount = await page.locator('.story-section').count();
+    expect(storyCount).toBeGreaterThan(1);
+
+    // The dense index grid is not mounted in Stories mode
+    expect(await page.locator('.proj-gallery').count()).toBe(0);
+
+    // Toggle reflects the default state
+    await expect(page.locator('.mode-toggle-btn').filter({ hasText: 'Stories' }))
+      .toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('.mode-toggle-btn').filter({ hasText: 'Index' }))
+      .toHaveAttribute('aria-pressed', 'false');
+  });
+
+  test('Toggle switches from Stories to Index', async ({ page }) => {
+    await page.goto(BASE + '/index.html#/projets');
+    await page.waitForSelector('.story-section', { timeout: 5000 });
+
+    await page.locator('.mode-toggle-btn').filter({ hasText: 'Index' }).click();
+
+    await page.waitForSelector('.proj-gallery', { timeout: 5000 });
+    await expect(page.locator('.proj-card').first()).toBeVisible();
+    expect(await page.locator('.story-section').count()).toBe(0);
+    await expect(page.locator('.mode-toggle-btn').filter({ hasText: 'Index' }))
+      .toHaveAttribute('aria-pressed', 'true');
+  });
+
+  test('Mode choice persists across reloads', async ({ page }) => {
+    await page.goto(BASE + '/index.html#/projets');
+    await page.waitForSelector('.story-section', { timeout: 5000 });
+
+    await page.locator('.mode-toggle-btn').filter({ hasText: 'Index' }).click();
+    await page.waitForSelector('.proj-gallery', { timeout: 5000 });
+
+    await page.reload();
+    await page.waitForSelector('.proj-gallery', { timeout: 5000 });
+    expect(await page.locator('.story-section').count()).toBe(0);
+    await expect(page.locator('.mode-toggle-btn').filter({ hasText: 'Index' }))
+      .toHaveAttribute('aria-pressed', 'true');
+  });
+
+  test('Toggle is keyboard operable (Tab then Enter and Space)', async ({ page }) => {
+    await page.goto(BASE + '/index.html#/projets');
+    await page.waitForSelector('.story-section', { timeout: 5000 });
+
+    // Tab through the page until the INACTIVE toggle option (Index) receives focus
+    let focusedIndex = false;
+    for (let i = 0; i < 40 && !focusedIndex; i++) {
+      await page.keyboard.press('Tab');
+      focusedIndex = await page.evaluate(() => {
+        const el = document.activeElement;
+        return Boolean(el && el.classList.contains('mode-toggle-btn') && el.getAttribute('aria-pressed') === 'false');
+      });
+    }
+    expect(focusedIndex).toBe(true);
+
+    // Space activates the focused (Index) option
+    await page.keyboard.press('Space');
+    await page.waitForSelector('.proj-gallery', { timeout: 5000 });
+    expect(await page.locator('.story-section').count()).toBe(0);
+
+    // Step back to the Stories option, Enter activates it
+    await page.keyboard.press('Shift+Tab');
+    const onStories = await page.evaluate(() => {
+      const el = document.activeElement;
+      return Boolean(el && el.classList.contains('mode-toggle-btn') && el.getAttribute('aria-pressed') === 'false');
+    });
+    expect(onStories).toBe(true);
+    await page.keyboard.press('Enter');
+    await page.waitForSelector('.story-section', { timeout: 5000 });
+    expect(await page.locator('.proj-gallery').count()).toBe(0);
+  });
+
+  test('No horizontal overflow in Stories mode (desktop + mobile)', async ({ page }) => {
+    for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
+      await page.setViewportSize(viewport);
+      await page.goto(BASE + '/index.html#/projets');
+      await page.waitForSelector('.story-section', { timeout: 5000 });
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+      await page.waitForTimeout(150);
+      const metrics = await page.evaluate(() => ({
+        scrollWidth: document.documentElement.scrollWidth,
+        innerWidth: window.innerWidth,
+      }));
+      expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.innerWidth);
+    }
+  });
+
+  test('Filters apply in both modes', async ({ page }) => {
+    await page.goto(BASE + '/index.html#/projets');
+    await page.waitForSelector('.story-section', { timeout: 5000 });
+
+    const totalStories = await page.locator('.story-section').count();
+
+    // Pick the first non-"all" category filter chip
+    await page.locator('.filter-chip:not(.filter-chip--all)').first().click();
+    await page.waitForTimeout(200);
+    const filteredStories = await page.locator('.story-section').count();
+    expect(filteredStories).toBeGreaterThan(0);
+    expect(filteredStories).toBeLessThan(totalStories);
+
+    // Same filtered set in Index mode
+    await page.locator('.mode-toggle-btn').filter({ hasText: 'Index' }).click();
+    await page.waitForSelector('.proj-gallery', { timeout: 5000 });
+    const filteredCards = await page.locator('.proj-card').count();
+    expect(filteredCards).toBe(filteredStories);
   });
 });
