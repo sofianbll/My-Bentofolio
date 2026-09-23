@@ -70,7 +70,7 @@ const THEME_KEY = 'bentofolio.theme';
 const NAV = [
 { path: '/', label: 'Accueil', icon: 'home' },
 { path: '/projets', label: 'Projets', icon: 'grid' },
-{ path: '/experiences', label: 'Experiences', icon: 'briefcase' },
+{ path: '/experiences', label: 'Expériences', icon: 'briefcase' },
 { path: '/cv', label: 'CV', icon: 'cv' },
 { path: '/contact', label: 'Contact', icon: 'mail' }];
 
@@ -82,13 +82,16 @@ function parseHash() {
 
 function Navbar({ route, navigate, theme, toggleTheme, adminMode }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const first = APP_CONFIG.profile?.firstName || '';
+  const last = APP_CONFIG.profile?.lastName || '';
+  const brandName = (first + ' ' + (last ? last.charAt(0).toUpperCase() + '.' : '')).trim() || 'Portfolio';
   const handleNav = (path) => { navigate(path); setMenuOpen(false); };
   return (
     <>
       <nav className="navbar no-print">
         <div className="nav-inner">
           <button className="nav-brand" onClick={() => handleNav('/')}>
-            <span className="brand-name">Sofian Bll</span>
+            <span className="brand-name">{brandName}</span>
             <span className="brand-dot">·</span>
             <span className="brand-tag">portfolio</span>
           </button>
@@ -136,15 +139,20 @@ function Navbar({ route, navigate, theme, toggleTheme, adminMode }) {
 }
 
 function Footer({ navigate }) {
+  const year = new Date().getFullYear();
+  const first = APP_CONFIG.profile?.firstName || '';
+  const last = APP_CONFIG.profile?.lastName || '';
+  const gh = (APP_CONFIG.socialLinks || []).find(l => (l.icon === 'github' || (l.label || '').toLowerCase().includes('github')));
+  const ghHref = gh?.href || 'https://github.com/';
   return (
     <footer className="app-footer no-print">
       <div className="footer-inner">
-        <span className="footer-copy">© {new Date().getFullYear()} Sofian Belloul — Développeur Web Full Stack</span>
+        <span className="footer-copy">© {year} {first} {last} — {APP_CONFIG.profile?.role || 'Portfolio'}</span>
         <div className="footer-links">
           <button className="footer-link" onClick={() => navigate('/projets')}>Projets</button>
           <button className="footer-link" onClick={() => navigate('/cv')}>CV</button>
           {import.meta.env.DEV && <button className="footer-link is-private" onClick={() => navigate('/admin')}>Espace admin</button>}
-          <a className="footer-link" href="https://github.com/Sofian-bll" target="_blank" rel="noreferrer">GitHub</a>
+          <a className="footer-link" href={ghHref} target="_blank" rel="noreferrer">GitHub</a>
         </div>
       </div>
     </footer>);
@@ -226,7 +234,7 @@ function App() {
     <div className="app">
       <div className="mesh-bg" aria-hidden="true" />
       {!isDash && <Navbar route={route} navigate={navigate} theme={theme} toggleTheme={toggleTheme} adminMode={adminMode} />}
-      {view}
+      {isDash ? view : <div className="view-anim" key={route}>{view}</div>}
       {!isDash && <Footer navigate={navigate} />}
       <div className={'toast no-print' + (toast ? ' show' : '')}><Icon name="check" size={15} /> {toast}</div>
     </div>);

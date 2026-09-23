@@ -36,8 +36,13 @@ function CaseStudyContent({ project }) {
 }
 
 function ProjectCard({ project, onOpen }) {
+  const handleMove = (e) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty('--x', (e.clientX - r.left) + 'px');
+    e.currentTarget.style.setProperty('--y', (e.clientY - r.top) + 'px');
+  };
   return (
-    <button className="proj-card" onClick={() => onOpen(project.id)}>
+    <button className="proj-card" onClick={() => onOpen(project.id)} onMouseMove={handleMove}>
       <div style={{ position: 'relative' }}>
         {project.featured && (
           <span className="proj-card-featured"><Icon name="star" size={11} /> CV</span>

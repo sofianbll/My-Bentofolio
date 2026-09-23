@@ -21,6 +21,7 @@
   flex: 0 0 auto;
 }
 .filter-chip:hover { border-color: var(--text-2); color: var(--text); }
+.filter-chip:active { transform: scale(0.97); }
 .filter-chip.active { color: #fff; border-color: transparent; background: var(--fc, var(--accent)); }
 .filter-chip--all.active { background: var(--accent); color: var(--accent-fg); }
 .filter-chip .count { font-size: 11px; opacity: 0.7; font-weight: 700; }
@@ -86,6 +87,20 @@
   display: grid; gap: var(--s4);
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 }
+/* Stagger entrance for gallery cards (first 8 children) */
+.proj-gallery > * {
+  opacity: 0; transform: translateY(14px);
+  animation: galleryIn 0.55s var(--ease) forwards;
+}
+@keyframes galleryIn { to { opacity: 1; transform: translateY(0); } }
+.proj-gallery > *:nth-child(1) { animation-delay: 0.05s; }
+.proj-gallery > *:nth-child(2) { animation-delay: 0.10s; }
+.proj-gallery > *:nth-child(3) { animation-delay: 0.15s; }
+.proj-gallery > *:nth-child(4) { animation-delay: 0.20s; }
+.proj-gallery > *:nth-child(5) { animation-delay: 0.25s; }
+.proj-gallery > *:nth-child(6) { animation-delay: 0.30s; }
+.proj-gallery > *:nth-child(7) { animation-delay: 0.35s; }
+.proj-gallery > *:nth-child(8) { animation-delay: 0.40s; }
 .proj-card { position: relative; }
 .gallery-empty {
   grid-column: 1 / -1; text-align: center; padding: var(--s11) var(--s4);
@@ -289,6 +304,7 @@
   transition: all var(--dur-fast) var(--ease);
 }
 .contact-social-btn:hover { border-color: var(--brand); color: var(--brand); }
+.contact-social-btn:active { transform: translateY(0) scale(0.98); }
 
 .contact-config-hint {
   display: flex; gap: var(--s2); align-items: flex-start; font-size: 11px; color: var(--text-2);

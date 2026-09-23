@@ -6,6 +6,26 @@ import { Icon, Cell, Chip, SectionTitle, TechTag, CatGlyph, Badge, ProjectThumb 
 import { DATA, APP_CONFIG, primaryCat } from './data.js';
 import { resolveImageSrc } from './config-runtime.js';
 
+function CountUp({ value }) {
+  const [display, setDisplay] = React.useState(value);
+  React.useEffect(() => {
+    const reduce = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || !Number.isFinite(value)) { setDisplay(value); return; }
+    setDisplay(0);
+    const start = performance.now();
+    const dur = 900;
+    let raf;
+    const tick = (t) => {
+      const k = Math.min(1, (t - start) / dur);
+      setDisplay(Math.round(value * (1 - Math.pow(1 - k, 3))));
+      if (k < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [value]);
+  return <strong>{display}</strong>;
+}
+
 function HomeView({ navigate, openProject }) {
   const { personalInfo: p, contactInfos, socialLinks, skillGroups, formations, interests, projects } = DATA;
   const visibleProjects = projects.filter(p => p.visible !== false);
@@ -25,7 +45,7 @@ function HomeView({ navigate, openProject }) {
               </Chip>
             ))}
           </div>
-          <h1 className="hero-name">{p.firstName}<br />{p.lastName}</h1>
+          <h1 className="hero-name">{p.firstName}<br /><span className="hero-name-accent">{p.lastName}</span></h1>
           <p className="hero-role">{p.role}</p>
           <div className="hero-meta">
             {DATA.profile?.webExperienceSince ? (
@@ -40,9 +60,9 @@ function HomeView({ navigate, openProject }) {
           </div>
           <p className="hero-bio">{p.bio}</p>
           <div className="hero-stats">
-            {visibleProjects.length > 0 && <span><Icon name="grid" size={14} /> <strong>{visibleProjects.length}</strong> projets</span>}
-            {(DATA.experiences || []).length > 0 && <span><Icon name="briefcase" size={14} /> <strong>{(DATA.experiences || []).length}</strong> expériences</span>}
-            {DATA.profile?.webExperienceSince && <span><Icon name="star" size={14} /> <strong>{new Date().getFullYear() - DATA.profile.webExperienceSince} ans</strong> d'expérience</span>}
+            {visibleProjects.length > 0 && <span><Icon name="grid" size={14} /> <CountUp value={visibleProjects.length} /> projets</span>}
+            {(DATA.experiences || []).length > 0 && <span><Icon name="briefcase" size={14} /> <CountUp value={(DATA.experiences || []).length} /> expériences</span>}
+            {DATA.profile?.webExperienceSince && <span><Icon name="star" size={14} /> <CountUp value={new Date().getFullYear() - DATA.profile.webExperienceSince} /> ans d'expérience</span>}
           </div>
           <div className="hero-actions">
             <button className="btn btn--brand" onClick={() => navigate('/contact')}>
