@@ -50,14 +50,14 @@ function CvView({ navigate, showToast, tweaks = {}, setTweak }) {
   return (
     <main className="page-wrap">
       <button className="back-link no-print" onClick={() => navigate('/')}><Icon name="arrowLeft" size={16} /> Retour au portfolio</button>
-      <div className="page-head no-print">
+      <div className="page-head no-print reveal">
         <h1 className="page-title">CV</h1>
         <p className="page-sub" style={{ fontSize: (DATA.profile?.cvSubtitleSize || 14) + 'px' }}>{DATA.profile?.cvSubtitle || "CV synthétique pour recruteurs : parcours, compétences, disponibilité et projets clés en une page."}</p>
       </div>
 
       <div className="cv-layout cv-layout--admin">
         {/* CONTROL PANEL */}
-        <aside className="cv-panel no-print">
+        <aside className="cv-panel no-print reveal">
 
           {/* Color mode — always visible */}
           <div className="cv-style-block">
@@ -82,7 +82,7 @@ function CvView({ navigate, showToast, tweaks = {}, setTweak }) {
         </aside>
 
         {/* A4 PREVIEW */}
-        <div className="cv-stage">
+        <div className="cv-stage reveal">
           <A4Frame>
             {/* HEADER */}
             <div className="cv-header2">

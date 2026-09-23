@@ -84,7 +84,7 @@ function ContactView({ navigate, showToast, tweaks = {}, adminMode }) {
       <button className="back-link" onClick={() => navigate('/')}>
         <Icon name="arrowLeft" size={16} /> Retour au portfolio
       </button>
-      <div className="page-head">
+      <div className="page-head reveal">
         <h1 className="page-title">Contact</h1>
         <p className="page-sub">Une opportunité d'alternance, un projet freelance, ou juste envie d'échanger — je suis dispo.</p>
       </div>
@@ -92,7 +92,7 @@ function ContactView({ navigate, showToast, tweaks = {}, adminMode }) {
       <div className="contact-bento">
 
         {/* ── FORM CARD ── */}
-        <div className="contact-form-card">
+        <div className="contact-form-card reveal">
           {sent ? (
             <div className="contact-sent">
               <div className="contact-sent-icon"><Icon name="check" size={26} /></div>
@@ -164,7 +164,7 @@ function ContactView({ navigate, showToast, tweaks = {}, adminMode }) {
         </div>
 
         {/* ── INFO CARD ── */}
-        <div className="contact-info-card">
+        <div className="contact-info-card reveal">
 
           {showStatus && (
             <div className="contact-status">

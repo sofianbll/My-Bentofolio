@@ -14,6 +14,33 @@
 .view-anim { animation: viewIn 0.45s var(--ease); }
 @keyframes viewIn { from { opacity: 0; transform: translateY(12px); } }
 @media (prefers-reduced-motion: reduce) { .view-anim { animation: none; } }
+html.is-preview .view-anim { animation: none; }
+
+/* ─── GENERIC SCROLL REVEAL UTILITY (T06 — ADR-0001) ───
+   Sobre scroll-driven reveal for standalone page blocks (CV panel/stage,
+   Contact cards…). Compositor-only opacity + light translateY, no JS
+   listeners. Default state stays visible: the animation is applied ONLY
+   under @supports (animation-timeline: view()) — graceful fallback.
+   Gated off under prefers-reduced-motion, in preview frames
+   (html.is-preview) and in print (screen-only effect). */
+@supports (animation-timeline: view()) {
+  .reveal {
+    animation: revealScroll linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 42%;
+  }
+}
+@keyframes revealScroll {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal { animation: none !important; opacity: 1 !important; transform: none !important; }
+}
+html.is-preview .reveal { animation: none !important; opacity: 1 !important; transform: none !important; }
+@media print {
+  .reveal { animation: none !important; opacity: 1 !important; transform: none !important; }
+}
 
 /* ─── VIEW TRANSITIONS MORPHING (T04, ADR-0001) ───
    Sobre par design : un léger crossfade global (root), et le morphing ne

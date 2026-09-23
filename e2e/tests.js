@@ -669,3 +669,53 @@ test.describe('Détail teinté (T05)', () => {
     expect(calls).toBeGreaterThanOrEqual(1);
   });
 });
+
+test.describe('Finitions CV + Contact (T06)', () => {
+  test('No horizontal overflow on /cv and /contact (desktop + mobile)', async ({ page }) => {
+    for (const route of ['cv', 'contact']) {
+      for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
+        await page.setViewportSize(viewport);
+        await page.goto(BASE + '/index.html#/' + route);
+        await page.waitForSelector('.page-wrap', { timeout: 5000 });
+        await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+        await page.waitForTimeout(150);
+        const metrics = await page.evaluate(() => ({
+          scrollWidth: document.documentElement.scrollWidth,
+          innerWidth: window.innerWidth,
+        }));
+        expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.innerWidth);
+      }
+    }
+  });
+
+  test('CV and Contact blocks get the sober scroll reveal (.reveal wired via view())', async ({ page }) => {
+    for (const route of ['cv', 'contact']) {
+      await page.goto(BASE + '/index.html#/' + route);
+      await page.waitForSelector('.page-wrap', { timeout: 5000 });
+      expect(await page.locator('.reveal').count()).toBeGreaterThanOrEqual(2);
+      const anim = await page.locator('.reveal').first().evaluate(el => getComputedStyle(el).animationName);
+      expect(anim).toBe('revealScroll');
+      // content itself is visible (opacity fully in)
+      await expect(page.locator('.reveal').first()).toBeVisible();
+    }
+  });
+
+  test.describe('reduced motion', () => {
+    test('.reveal stays static and visible under prefers-reduced-motion (cv + contact)', async ({ browser }) => {
+      const context = await browser.newContext({ reducedMotion: 'reduce' });
+      const page = await context.newPage();
+      for (const route of ['cv', 'contact']) {
+        await page.goto(BASE + '/index.html#/' + route);
+        await page.waitForSelector('.page-wrap', { timeout: 5000 });
+        await expect(page.locator('.reveal').first()).toBeVisible();
+        const probe = await page.locator('.reveal').first().evaluate(el => ({
+          anim: getComputedStyle(el).animationName,
+          opacity: getComputedStyle(el).opacity,
+        }));
+        expect(probe.anim).toBe('none');
+        expect(probe.opacity).toBe('1');
+      }
+      await context.close();
+    });
+  });
+});
