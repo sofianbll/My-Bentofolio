@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV — Sofian Belloul</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+
+        /* ===================== */
+        /* RESET & BASE          */
+        /* ===================== */
+        @page { size: A4; margin: 0; }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            color: #09090b;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        /* ===================== */
+        /* A4 PAGE               */
+        /* Specs Figma node 16:240
+           – bg white, border black, radius 14px
+           – grid 2 cols x 3 rows
+           – gap 10px, padding 10px          */
+        /* ===================== */
+        .cv-page {
+            width: 210mm;
+            height: 297mm;
+            background: #fff;
+            border: 1px solid #000;
+            border-radius: 14px;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: minmax(0, 0.8fr) fit-content(100%) minmax(0, 1fr);
+            gap: 10px;
+            padding: 10px;
+        }
+
+        /* ===================== */
+        /* BENTO CARDS           */
+        /* Specs Figma:
+           border: 1px solid #bebecd
+           border-radius: 14px (base) or 25px (bottom row)
+           padding: 16px
+           overflow: hidden                  */
+        /* ===================== */
+        .card {
+            border: 1px solid #bebecd;
+            border-radius: 14px;
+            overflow: hidden;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-lg {
+            border-radius: 25px;
+        }
+
+        /* ===================== */
+        /* PILLS LABELS          */
+        /* Specs Figma (PillsLabel component):
+           Variante2 (clair): bg transparent, border #e1e1e6, text black
+           Par défaut (dark) : bg black, border #e1e1e6, text white
+           px: 10px, py: 8px, radius: 18px
+           font: 14px regular                */
+        /* ===================== */
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 8px 10px;
+            border-radius: 18px;
+            border: 1px solid #e1e1e6;
+            font-size: 14px;
+            font-weight: 400;
+            white-space: nowrap;
+            align-self: flex-start;
+            flex-shrink: 0;
+            line-height: normal;
+        }
+
+        .pill-light {
+            background: transparent;
+            color: #09090b;
+        }
+
+        .pill-dark {
+            background: #09090b;
+            border-color: #e1e1e6;
+            color: #fff;
+        }
+
+        /* ===================== */
+        /* ROW 1 COL 1: HERO     */
+        /* Specs Figma node 16:400:
+           flex col, justify-between
+           name: 24px bold -0.48px
+           job:  14px semibold
+           desc: 12px regular              */
+        /* ===================== */
+        .hero-card {
+            grid-column: 1;
+            grid-row: 1;
+            justify-content: space-between;
+            gap: 0;
+        }
+
+        .hero-top {}
+
+        .hero-name {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.48px;
+            color: #09090b;
+            line-height: normal;
+            margin-top: 8px;
+            text-transform: capitalize;
+        }
+
+        .hero-job {
+            font-size: 14px;
+            font-weight: 600;
+            color: #09090b;
+            line-height: normal;
+            margin-top: 2px;
+        }
+
+        .hero-desc {
+            font-size: 12px;
+            font-weight: 400;
+            color: #09090b;
+            line-height: normal;
+        }
+
+        /* ===================== */
+        /* ROW 1 COL 2: PHOTO    */
+        /* Specs Figma node 16:241:
+           bg white, no padding
+           img: object-cover, fills card     */
+        /* ===================== */
+        .photo-card {
+            grid-column: 2;
+            grid-row: 1;
+            padding: 0;
+            background: #fff;
+            position: relative;
+        }
+
+        .photo-card img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center top;
+            pointer-events: none;
+            /* Fix EXIF rotation if image was shot in portrait and stored rotated */
+            image-orientation: from-image;
+        }
+
+        /* ===================== */
+        /* ROW 2 COL 1: CONTACT  */
+        /* Specs Figma node 16:263:
+           LabelNameDivider component
+           flex col, gap 10px, padding 16px
+           label: #eeeef1 bg pill, 14px gray
+           value: 12px medium gray
+           divider: 1px #e1e1e6             */
+        /* ===================== */
+        .contact-card {
+            grid-column: 1;
+            grid-row: 2;
+            gap: 8px;
+            /* self-start so it doesn't expand */
+            align-self: start;
+        }
+
+        .contact-row {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .contact-row-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .contact-label-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 6px 10px;
+            background: #eeeef1;
+            border: 1px solid #e1e1e6;
+            border-radius: 18px;
+            font-size: 14px;
+            font-weight: 400;
+            color: #71717a;
+            white-space: nowrap;
+            flex-shrink: 0;
+            line-height: normal;
+        }
+
+        .contact-value {
+            font-size: 12px;
+            font-weight: 500;
+            color: #71717a;
+            text-align: right;
+        }
+
+        .contact-divider {
+            width: 100%;
+            height: 1px;
+            background: #e1e1e6;
+        }
+
+        /* ===================== */
+        /* ROW 2 COL 2: SKILLS   */
+        /* Specs Figma node 16:510:
+           SkillPill: bg #e4e4e7
+             px 12 py 6, radius 10px
+             10px medium
+           flex wrap, gap 4px
+           content-end (pills align bottom) */
+        /* Portfolio: colored icon pills     */
+        /* ===================== */
+        .skills-card {
+            grid-column: 2;
+            grid-row: 2;
+            gap: 10px;
+        }
+
+        .skills-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            align-content: flex-end;
+            flex: 1;
+        }
+
+        /* Figma original: grey pill */
+        .skill-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #e4e4e7;
+            border-radius: 10px;
+            padding: 6px 12px;
+            font-size: 10px;
+            font-weight: 500;
+            color: #09090b;
+            white-space: nowrap;
+            line-height: normal;
+        }
+
+        /* Portfolio-style: colored background for dev skills */
+        .skill-pill-colored {
+            color: #fff;
+            padding: 5px 10px 5px 6px;
+        }
+
+        .skill-pill img {
+            width: 18px;
+            height: 18px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+
+        /* Tech colors */
+        .s-laravel  { background: #ff2d20; }
+        .s-vue      { background: #42b883; }
+        .s-java     { background: #e76f00; }
+        .s-tailwind { background: #06b6d4; }
+        .s-mysql    { background: #00618a; }
+        .s-shadcn   { background: #18181b; }
+        .s-docker   { background: #2496ed; }
+        .s-git      { background: #f05032; }
+        .s-linux    { background: #1793d1; }
+        .s-neovim   { background: #57a143; }
+        .s-bash     { background: #3e3e3e; }
+        .s-figma    { background: linear-gradient(135deg,#f24e1e,#a259ff,#1abcfe); }
+        .s-framer   { background: #0055ff; }
+        .s-python   { background: #3776ab; }
+        .s-n8n      { background: #ea4b71; }
+
+        /* ===================== */
+        /* ROW 3: FORM + EXP     */
+        /* Specs Figma:
+           Formation-form node 16:410
+           Expérience-form node 36:583
+           Both: border-radius 25px !         */
+        /* ===================== */
+        .bottom-left {
+            grid-column: 1;
+            grid-row: 3;
+        }
+
+        .bottom-right {
+            grid-column: 2;
+            grid-row: 3;
+        }
+
+        /* Section cards */
+        .section-card {
+            border: 1px solid #bebecd;
+            border-radius: 25px;
+            overflow: hidden;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            height: 100%;
+        }
+
+        /* Card group (Figma: flex col gap 10px) */
+        .card-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        /* WorkFormationCard — Figma node 36:237:
+           border #e1e1e6, radius 10px, padding 16px
+           gap 8px, items-center, justify-center
+           width: 280px (adapté en 100%)    */
+        .work-card {
+            border: 1px solid #e1e1e6;
+            border-radius: 10px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .work-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        /* Figma: 14px semibold -0.28px capitalize */
+        .work-card-title {
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: -0.28px;
+            color: #09090b;
+            line-height: normal;
+            text-transform: capitalize;
+            flex: 1;
+        }
+
+        /* Figma: SkillPill Variante2 — border outline, px 8 py 4, 10px light */
+        .work-tag {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e4e4e7;
+            border-radius: 10px;
+            padding: 4px 8px;
+            font-size: 10px;
+            font-weight: 300;
+            color: #09090b;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        /* Figma: date row — 12px regular, arrow icon ~30px */
+        .work-card-dates {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            font-size: 12px;
+            font-weight: 400;
+            color: #09090b;
+            line-height: normal;
+            gap: 4px;
+        }
+
+        .work-arrow {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            color: #09090b;
+        }
+
+        /* Figma: desc — 11px light #626262 */
+        .work-card-desc {
+            font-size: 11px;
+            font-weight: 300;
+            color: #626262;
+            line-height: normal;
+            width: 100%;
+        }
+
+        /* ===================== */
+        /* PRINT                 */
+        /* ===================== */
+        @media print {
+            body { background: none; padding: 0; }
+            .cv-page { width: 210mm; height: 297mm; }
+        }
+
+    </style>
+</head>
+<body>
+<div class="cv-page">
+
+    <!-- ============================== -->
+    <!-- ROW 1 COL 1 : HERO             -->
+    <!-- Figma node 16:400              -->
+    <!-- flex col, justify-between      -->
+    <!-- ============================== -->
+    <div class="card hero-card">
+        <!-- Hello pill — Variante2 (clear) -->
+        <div class="hero-top">
+            <span class="pill pill-light">✨ Hello</span>
+            <div class="hero-name">Sofian Belloul</div>
+            <div class="hero-job">Développeur Web Full Stack</div>
+        </div>
+        <p class="hero-desc">
+            Ex-webdesigner Framer reconverti dev — Laravel, Vue.js, Java.<br>
+            Passionné par l'optimisation, la résolution de problèmes<br>
+            et la création d'architectures propres.<br>
+            DJ Techno à mes heures, dev le reste du temps.
+        </p>
+    </div>
+
+    <!-- ============================== -->
+    <!-- ROW 1 COL 2 : PHOTO            -->
+    <!-- Figma node 16:241              -->
+    <!-- bg white, img covers card      -->
+    <!-- ============================== -->
+    <div class="card photo-card">
+        <img
+            src="file:///Users/sofian/Documents/Obsidian/Sofian's%20Vault/Backend/Attachments/sofian_photo_cv.jpeg"
+            onerror="this.onerror=null;this.src='file:///Users/sofian/Documents/Obsidian/Sofian\'s%20Vault/Backend/Attachments/sofian_profile_cv.png'"
+            alt="Sofian Belloul"
+        >
+    </div>
+
+    <!-- ============================== -->
+    <!-- ROW 2 COL 1 : CONTACT          -->
+    <!-- Figma node 16:263              -->
+    <!-- LabelNameDivider ×4            -->
+    <!-- ============================== -->
+    <div class="card contact-card">
+        <div class="contact-row">
+            <div class="contact-row-inner">
+                <span class="contact-label-pill">Prénom</span>
+                <span class="contact-value">Sofian</span>
+            </div>
+            <div class="contact-divider"></div>
+        </div>
+        <div class="contact-row">
+            <div class="contact-row-inner">
+                <span class="contact-label-pill">Nom</span>
+                <span class="contact-value">Belloul</span>
+            </div>
+            <div class="contact-divider"></div>
+        </div>
+        <div class="contact-row">
+            <div class="contact-row-inner">
+                <span class="contact-label-pill">Email</span>
+                <span class="contact-value">sofian.belloul@epitech.eu</span>
+            </div>
+            <div class="contact-divider"></div>
+        </div>
+        <div class="contact-row">
+            <div class="contact-row-inner">
+                <span class="contact-label-pill">Tel</span>
+                <span class="contact-value">07 67 54 62 09</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- ROW 2 COL 2 : COMPÉTENCES      -->
+    <!-- Figma node 16:510              -->
+    <!-- Skill pills colored (portfolio)-->
+    <!-- ============================== -->
+    <div class="card skills-card">
+        <span class="pill pill-dark">Compétence</span>
+        <div class="skills-wrap">
+            <span class="skill-pill skill-pill-colored s-laravel">
+                <img src="https://cdn.simpleicons.org/laravel/ffffff" alt=""> PHP / Laravel
+            </span>
+            <span class="skill-pill skill-pill-colored s-vue">
+                <img src="https://cdn.simpleicons.org/vuedotjs/ffffff" alt=""> Vue 3 / Vite
+            </span>
+            <span class="skill-pill skill-pill-colored s-java">
+                <img src="https://cdn.simpleicons.org/openjdk/ffffff" alt=""> Java SE
+            </span>
+            <span class="skill-pill skill-pill-colored s-tailwind">
+                <img src="https://cdn.simpleicons.org/tailwindcss/ffffff" alt=""> Tailwind CSS
+            </span>
+            <span class="skill-pill skill-pill-colored s-mysql">
+                <img src="https://cdn.simpleicons.org/mysql/ffffff" alt=""> MySQL
+            </span>
+            <span class="skill-pill skill-pill-colored s-shadcn">
+                <img src="https://cdn.simpleicons.org/shadcnui/ffffff" alt=""> shadcn-vue
+            </span>
+            <span class="skill-pill skill-pill-colored s-docker">
+                <img src="https://cdn.simpleicons.org/docker/ffffff" alt=""> Docker / Sail
+            </span>
+            <span class="skill-pill skill-pill-colored s-git">
+                <img src="https://cdn.simpleicons.org/git/ffffff" alt=""> Git / GitHub
+            </span>
+            <span class="skill-pill skill-pill-colored s-linux">
+                <img src="https://cdn.simpleicons.org/archlinux/ffffff" alt=""> Linux (Arch)
+            </span>
+            <span class="skill-pill skill-pill-colored s-neovim">
+                <img src="https://cdn.simpleicons.org/neovim/ffffff" alt=""> Neovim / tmux
+            </span>
+            <span class="skill-pill skill-pill-colored s-bash">
+                <img src="https://cdn.simpleicons.org/gnubash/ffffff" alt=""> Bash
+            </span>
+            <span class="skill-pill skill-pill-colored s-figma">
+                <img src="https://cdn.simpleicons.org/figma/ffffff" alt=""> Figma
+            </span>
+            <span class="skill-pill skill-pill-colored s-framer">
+                <img src="https://cdn.simpleicons.org/framer/ffffff" alt=""> Framer
+            </span>
+            <span class="skill-pill skill-pill-colored s-python">
+                <img src="https://cdn.simpleicons.org/python/ffffff" alt=""> Python
+            </span>
+            <span class="skill-pill skill-pill-colored s-n8n">
+                <img src="https://cdn.simpleicons.org/n8n/ffffff" alt=""> n8n
+            </span>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- ROW 3 COL 1 : FORMATION        -->
+    <!-- Figma node 16:410              -->
+    <!-- border-radius 25px             -->
+    <!-- justify-between (pill haut,    -->
+    <!--   cards bas)                   -->
+    <!-- ============================== -->
+    <div class="section-card bottom-left">
+        <span class="pill pill-dark">Formation</span>
+        <div class="card-group">
+            <div class="work-card">
+                <div class="work-card-header">
+                    <span class="work-card-title">Web@cademie By Epitech</span>
+                    <span class="work-tag">Paris</span>
+                </div>
+                <div class="work-card-dates">
+                    <span>2024</span>
+                    <span class="work-arrow">→</span>
+                    <span>2026</span>
+                </div>
+                <p class="work-card-desc">Titre RNCP Niveau 5 (BAC+2) — Développeur-Intégrateur Web. Pédagogie par projets : PHP (Laravel), Vue 3, Java SE. Module avancé prise de parole et présentations.</p>
+            </div>
+            <div class="work-card">
+                <div class="work-card-header">
+                    <span class="work-card-title">Baccalauréat Général</span>
+                    <span class="work-tag">Lycée</span>
+                </div>
+                <div class="work-card-dates">
+                    <span>2020</span>
+                    <span class="work-arrow">→</span>
+                    <span>2023</span>
+                </div>
+                <p class="work-card-desc">Spécialités Mathématiques et Physique-Chimie.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- ROW 3 COL 2 : EXPÉRIENCE PRO   -->
+    <!-- Figma node 36:583              -->
+    <!-- border-radius 25px             -->
+    <!-- ============================== -->
+    <div class="section-card bottom-right">
+        <span class="pill pill-dark">Expérience Pro</span>
+        <div class="card-group">
+            <div class="work-card">
+                <div class="work-card-header">
+                    <span class="work-card-title">Connect'IN — Réseau Social</span>
+                    <span class="work-tag">Laravel</span>
+                </div>
+                <div class="work-card-dates">
+                    <span>Projet Epitech</span>
+                    <span class="work-arrow">→</span>
+                    <span>3 semaines</span>
+                </div>
+                <p class="work-card-desc">API REST Laravel, auth Sanctum, relations SQL. Front Vue 3/Tailwind. Tests unitaires.</p>
+            </div>
+            <div class="work-card">
+                <div class="work-card-header">
+                    <span class="work-card-title">My Cinema — Back-Office</span>
+                    <span class="work-tag">PHP MVC</span>
+                </div>
+                <div class="work-card-dates">
+                    <span>Projet Epitech</span>
+                    <span class="work-arrow">→</span>
+                    <span>2 semaines</span>
+                </div>
+                <p class="work-card-desc">Architecture MVC from scratch, API REST, Vue 3 + shadcn-vue, logiques métiers avancées.</p>
+            </div>
+            <div class="work-card">
+                <div class="work-card-header">
+                    <span class="work-card-title">Webdesigner Freelance</span>
+                    <span class="work-tag">Framer</span>
+                </div>
+                <div class="work-card-dates">
+                    <span>Indépendant</span>
+                    <span class="work-arrow">→</span>
+                    <span>2 ans</span>
+                </div>
+                <p class="work-card-desc">Sites vitrines et e-commerce haut de gamme. Framer, Shopify, Webflow. Architectures multi-tenants.</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,174 @@
+/* =============================================
+   BENTOFOLIO DESIGN SYSTEM
+   Layer 2 — REUSABLE COMPONENTS
+   
+   Atomic pieces used in multiple contexts:
+   chip, badge, tag, icon-btn, social-link, xp-card, project-card
+   ============================================= */
+
+/* ─── CHIP (inline status/label) ─── */
+.chip {
+    display: inline-flex; align-items: center; gap: var(--s1);
+    padding: 5px 14px;
+    border-radius: var(--r-pill);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.chip--outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+}
+
+.chip--solid {
+    background: var(--accent);
+    color: var(--accent-fg);
+    border: none;
+}
+
+/* ─── BADGE (compact metadata) ─── */
+.badge {
+    font-size: var(--text-xs); font-weight: 600;
+    padding: 4px 10px;
+    border-radius: var(--r-pill);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+.badge--color {
+    background: var(--badge-c, var(--accent));
+    color: #fff;
+    border: none;
+}
+
+/* ─── TAG (skill pill) ─── */
+.tag {
+    padding: 5px 12px;
+    border-radius: var(--r-sm);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: #fff;
+    transition: transform 0.3s var(--ease);
+}
+.tag:hover { transform: scale(1.06); }
+
+/* Tech brand colors */
+.t-laravel  { background: var(--c-laravel); }
+.t-vue      { background: var(--c-vue); color: #0a2e1a; }
+.t-java     { background: var(--c-java); }
+.t-tailwind { background: var(--c-tailwind); }
+.t-shadcn   { background: var(--c-shadcn); }
+.t-mysql    { background: var(--c-mysql); }
+.t-docker   { background: var(--c-docker); }
+.t-git      { background: var(--c-git); }
+.t-linux    { background: var(--c-linux); }
+.t-nvim     { background: var(--c-nvim); }
+.t-bash     { background: var(--c-bash); }
+.t-figma    { background: linear-gradient(135deg, var(--c-figma-1), var(--c-figma-2), var(--c-figma-3)); }
+.t-framer   { background: var(--c-framer); }
+.t-python   { background: var(--c-python); }
+.t-rag      { background: var(--c-rag); }
+.t-n8n      { background: var(--c-n8n); }
+.t-soft     {
+    background: var(--bg-inset);
+    color: var(--text);
+    border: 1px solid var(--border-sub);
+}
+
+/* ─── ICON BUTTON ─── */
+.icon-btn {
+    background: none; border: none;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    color: var(--text);
+    cursor: pointer;
+    transition: background var(--dur) var(--ease);
+}
+.icon-btn:hover { background: var(--bg-inset); }
+.icon-btn svg { width: 18px; height: 18px; }
+
+/* ─── SOCIAL LINK ─── */
+.social-link {
+    flex: 1;
+    display: flex; align-items: center; gap: var(--s2);
+    padding: var(--s3) var(--s4);
+    background: var(--bg-inset);
+    border-radius: var(--r-sm);
+    text-decoration: none; color: var(--text);
+    font-size: var(--text-base); font-weight: 600;
+    border: 1px solid transparent;
+    transition:
+        border-color var(--dur) var(--ease),
+        transform 0.3s var(--ease);
+}
+.social-link:hover {
+    border-color: var(--border);
+    transform: translateY(-1px);
+}
+.social-icon { width: 16px; height: 16px; color: var(--text-2); }
+
+/* ─── LINK ARROW ─── */
+.link-arrow {
+    display: inline-flex; align-items: center; gap: var(--s1);
+    font-size: var(--text-base); font-weight: 600;
+    color: var(--text-2);
+    text-decoration: none;
+    transition: color var(--dur) var(--ease);
+}
+.link-arrow:hover { color: var(--text); }
+.link-arrow svg { width: 14px; height: 14px; }
+
+/* ─── XP CARD (experience/education) ─── */
+.xp-card {
+    padding: var(--s4);
+    background: var(--bg-inset);
+    border-radius: var(--r-sm);
+    margin-bottom: var(--s5);
+}
+.xp-top {
+    display: flex; justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--s2);
+}
+.xp-name  { font-size: var(--text-md); font-weight: 700; }
+.xp-where { font-size: var(--text-sm); color: var(--text-2); margin-bottom: var(--s2); }
+.xp-desc  { font-size: var(--text-base); color: var(--text-2); line-height: var(--leading-normal); }
+
+/* ─── PROJECT CARD ─── */
+.project-card {
+    padding: var(--s4);
+    background: var(--bg-inset);
+    border-radius: var(--r-sm);
+    border: 1px solid transparent;
+    transition:
+        border-color var(--dur) var(--ease),
+        transform 0.3s var(--ease);
+}
+.project-card:hover {
+    border-color: var(--border);
+    transform: translateY(-2px);
+}
+
+.pc-top  { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--s2); }
+.pc-name { font-size: var(--text-md); font-weight: 700; }
+.pc-meta { font-size: var(--text-sm); color: var(--text-2); margin-bottom: var(--s2); }
+.pc-desc { font-size: var(--text-base); color: var(--text-2); line-height: var(--leading-normal); }
+
+/* ─── INTEREST ROW ─── */
+.interest-row {
+    display: flex; gap: var(--s3); align-items: center;
+}
+.interest-emoji {
+    font-size: 20px;
+    width: 36px; height: 36px;
+    display: grid; place-items: center;
+    background: var(--bg-inset);
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.interest-row strong { font-size: var(--text-base); display: block; }
+.interest-detail     { font-size: var(--text-sm); color: var(--text-2); }

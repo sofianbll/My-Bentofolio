@@ -1,0 +1,154 @@
+/* =============================================
+   BENTOFOLIO DESIGN SYSTEM
+   Layer 0 — DESIGN TOKENS
+   
+   All primitive & semantic tokens.
+   Import this first; everything else depends on it.
+   ============================================= */
+
+:root {
+    /* ─── COLOR PRIMITIVES ─── */
+    --zinc-0:   #ffffff;
+    --zinc-50:  #f8f8fa;
+    --zinc-100: #f0f0f3;
+    --zinc-150: #e8e8ec;
+    --zinc-200: #dcdce0;
+    --zinc-250: #ececef;
+    --zinc-300: #c4c4ca;
+    --zinc-400: #8a8a96;
+    --zinc-500: #6b6b76;
+    --zinc-600: #4a4a54;
+    --zinc-700: #2c2c34;
+    --zinc-800: #1a1a1e;
+    --zinc-900: #111113;
+    --zinc-950: #0a0a0c;
+
+    /* ─── SEMANTIC COLORS (Light Mode) ─── */
+    --bg-page:    var(--zinc-100);
+    --bg-card:    var(--zinc-0);
+    --bg-inset:   #f4f4f6;
+    --text:       var(--zinc-900);
+    --text-2:     var(--zinc-500);
+    --border:     var(--zinc-200);
+    --border-sub: var(--zinc-250);
+
+    /* Accent */
+    --accent:     var(--zinc-900);
+    --accent-fg:  var(--zinc-0);
+
+    /* Nav */
+    --nav-bg:     rgba(255,255,255,0.72);
+
+    /* Glow */
+    --glow:       rgba(0,0,0,0.04);
+
+    /* ─── SPACING SCALE (4px base) ─── */
+    --s1:  4px;
+    --s2:  8px;
+    --s3:  12px;
+    --s4:  16px;
+    --s5:  20px;
+    --s6:  24px;
+    --s7:  32px;
+    --s8:  40px;
+    --s9:  48px;
+    --s10: 64px;
+    --s11: 80px;
+    --s12: 96px;
+
+    /* ─── BORDER RADIUS ─── */
+    --r-xs:   4px;
+    --r-sm:   6px;
+    --r-md:   10px;
+    --r-lg:   14px;
+    --r-pill: 999px;
+
+    /* ─── TYPOGRAPHY ─── */
+    --font-display: 'Syne', sans-serif;
+    --font-body:    'SF Pro Display', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+    /* Type scale — modular 1.25 ratio */
+    --text-xs:    11px;
+    --text-sm:    12px;
+    --text-base:  14px;
+    --text-md:    15px;
+    --text-lg:    16px;
+    --text-xl:    18px;
+    --text-2xl:   22px;
+
+    /* Line heights */
+    --leading-tight:  1.1;
+    --leading-snug:   1.3;
+    --leading-normal: 1.55;
+    --leading-loose:  1.7;
+
+    /* Letter spacing */
+    --tracking-tight:   -0.04em;
+    --tracking-snug:    -0.03em;
+    --tracking-normal:   0;
+    --tracking-wide:     0.06em;
+    --tracking-wider:    0.08em;
+
+    /* ─── MOTION ─── */
+    --ease:         cubic-bezier(0.16, 1, 0.3, 1);  /* quart-out */
+    --ease-in:      cubic-bezier(0.4, 0, 1, 1);
+    --ease-spring:  cubic-bezier(0.34, 1.56, 0.64, 1);
+    --dur:          0.45s;
+    --dur-fast:     0.2s;
+    --dur-slow:     0.65s;
+
+    /* ─── SHADOWS ─── */
+    --shadow-sm:  0 1px 3px rgba(0,0,0,0.04);
+    --shadow-md:  0 2px 20px rgba(0,0,0,0.04);
+    --shadow-lg:  0 8px 32px rgba(0,0,0,0.08);
+
+    /* ─── Z-INDEX SCALE ─── */
+    --z-base:     1;
+    --z-card:     5;
+    --z-sticky:   100;
+    --z-nav:      1000;
+    --z-overlay:  2000;
+    --z-modal:    3000;
+    --z-tooltip:  4000;
+
+    /* ─── BRAND COLORS (Tech) ─── */
+    --c-laravel:  #ff2d20;
+    --c-vue:      #42b883;
+    --c-java:     #e76f00;
+    --c-tailwind: #06b6d4;
+    --c-shadcn:   #18181b;
+    --c-mysql:    #00618a;
+    --c-docker:   #2496ed;
+    --c-git:      #f05032;
+    --c-linux:    #1793d1;
+    --c-nvim:     #57a143;
+    --c-bash:     #3e3e3e;
+    --c-figma-1:  #f24e1e;
+    --c-figma-2:  #a259ff;
+    --c-figma-3:  #1abcfe;
+    --c-framer:   #0055ff;
+    --c-python:   #3776ab;
+    --c-rag:      #6366f1;
+    --c-n8n:      #ea4b71;
+}
+
+/* ─── DARK THEME OVERRIDES ─── */
+[data-theme="dark"] {
+    --bg-page:    var(--zinc-950);
+    --bg-card:    rgba(22,22,26,0.65);
+    --bg-inset:   var(--zinc-800);
+    --text:       #ededef;
+    --text-2:     var(--zinc-400);
+    --border:     rgba(255,255,255,0.08);
+    --border-sub: rgba(255,255,255,0.05);
+
+    --accent:     var(--zinc-0);
+    --accent-fg:  var(--zinc-950);
+
+    --nav-bg:     rgba(10,10,12,0.65);
+    --glow:       rgba(255,255,255,0.07);
+
+    --shadow-sm:  0 1px 3px rgba(0,0,0,0.3);
+    --shadow-md:  0 2px 20px rgba(0,0,0,0.3);
+    --shadow-lg:  0 8px 32px rgba(0,0,0,0.5);
+}

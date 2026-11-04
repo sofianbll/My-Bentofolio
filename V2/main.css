@@ -1,0 +1,19 @@
+/* =============================================
+   BENTOFOLIO DESIGN SYSTEM — V2
+   Import Orchestrator
+   
+   Order matters:
+   1. Tokens   — variables everything depends on
+   2. Reset    — normalize + base defaults
+   3. Layout   — page structure, grid, navbar
+   4. Effects  — glow, mesh, animations
+   5. Components — reusable atoms
+   6. Sections — page-specific compositions
+   ============================================= */
+
+@import url('tokens.css');
+@import url('reset.css');
+@import url('layout.css');
+@import url('effects.css');
+@import url('components.css');
+@import url('sections.css');

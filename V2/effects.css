@@ -1,0 +1,56 @@
+/* =============================================
+   BENTOFOLIO DESIGN SYSTEM
+   Layer 4 — EFFECTS & MOTION
+   
+   Atmospheric bg, glow system, entrance animations.
+   ============================================= */
+
+/* ─── MESH BACKGROUND ─── */
+.mesh-bg {
+    position: fixed; inset: 0;
+    z-index: -1; pointer-events: none;
+    background:
+        radial-gradient(ellipse 80% 60% at 10% 40%, rgba(180,180,190,0.18), transparent),
+        radial-gradient(ellipse 60% 50% at 90% 70%, rgba(160,170,185,0.14), transparent);
+    transition: background var(--dur) var(--ease);
+}
+[data-theme="dark"] .mesh-bg {
+    background:
+        radial-gradient(ellipse 70% 50% at 15% 35%, rgba(60,100,220,0.12), transparent),
+        radial-gradient(ellipse 60% 40% at 85% 65%, rgba(130,70,220,0.10), transparent);
+}
+
+/* ─── MOUSE GLOW (Overdrive) ─── */
+.glow-blob {
+    position: absolute; inset: 0;
+    z-index: 1; pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    background: radial-gradient(
+        500px circle at var(--x, 50%) var(--y, 50%),
+        var(--glow),
+        transparent 40%
+    );
+}
+.cell:hover .glow-blob { opacity: 1; }
+
+/* ─── CELL ENTRANCE ─── */
+.cell {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: cellIn var(--dur-slow) var(--ease) forwards;
+}
+
+/* Stagger delays (up to 8 children) */
+.cell:nth-child(1) { animation-delay: 0.06s; }
+.cell:nth-child(2) { animation-delay: 0.12s; }
+.cell:nth-child(3) { animation-delay: 0.18s; }
+.cell:nth-child(4) { animation-delay: 0.24s; }
+.cell:nth-child(5) { animation-delay: 0.30s; }
+.cell:nth-child(6) { animation-delay: 0.36s; }
+.cell:nth-child(7) { animation-delay: 0.42s; }
+.cell:nth-child(8) { animation-delay: 0.48s; }
+
+@keyframes cellIn {
+    to { opacity: 1; transform: translateY(0); }
+}

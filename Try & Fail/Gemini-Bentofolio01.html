@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV — Sofian Belloul</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Inter pour la clarté, Playfair Display pour l'élégance des titres -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-body: #eef0f3;
+            --bg-card: #ffffff;
+            --text-main: #09090b;
+            --text-muted: #626262;
+            --border-color: #e1e1e6;
+            --accent-alternance: #d39d73; /* Couleur de la maquette "Identity Card" */
+            --radius-bento: 24px;
+            --radius-pill: 99px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+            /* Subtil grain en fond pour l'effet "Creative" */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+        }
+
+        /* ===================== */
+        /* GRILLE BENTO          */
+        /* ===================== */
+        .cv-container {
+            width: 100%;
+            max-width: 1000px; /* Taille optimale pour lecture écran */
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: auto auto auto;
+            gap: 16px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-bento);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+        }
+
+        /* ===================== */
+        /* SECTIONS SPÉCIFIQUES  */
+        /* ===================== */
+
+        /* 1. HERO (Identity Card Style) */
+        .hero {
+            grid-column: span 3;
+            grid-row: span 1;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        /* Effet de flou coloré (Blob) en arrière plan du Hero */
+        .hero::before, .hero::after {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+        .hero::before {
+            background: #0055ff; /* Bleu */
+            top: -100px;
+            left: -50px;
+        }
+        .hero::after {
+            background: #ff5e00; /* Orange */
+            bottom: -150px;
+            right: 10%;
+        }
+
+        .hero-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-size: 42px;
+            font-weight: 600;
+            letter-spacing: -1px;
+            line-height: 1.1;
+        }
+
+        .job-title {
+            font-size: 20px;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .badge-alternance {
+            background-color: var(--accent-alternance);
+            color: #000;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 2px 10px rgba(211, 157, 115, 0.3);
+        }
+
+        .availability {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+
+        .hero-desc {
+            font-size: 15px;
+            line-height: 1.6;
+            max-width: 85%;
+            color: #3f3f46;
+        }
+
+        /* 2. PHOTO (Arch Style) */
+        .photo-card {
+            grid-column: span 1;
+            grid-row: span 1;
+            padding: 0;
+            border-radius: 100px 100px var(--radius-bento) var(--radius-bento); /* Forme d'arche */
+        }
+
+        .photo-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            filter: grayscale(20%) contrast(110%); /* Touche éditoriale */
+        }
+
+        /* Titres de section */
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .section-title::after {
+            content: '✦'; /* Étoile minimaliste */
+            font-family: sans-serif;
+            font-size: 14px;
+            color: #a1a1aa;
+        }
+
+        /* 3. CONTACT */
+        .contact {
+            grid-column: span 1;
+            grid-row: span 2;
+        }
+
+        .contact-item {
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .contact-item:last-child {
+            border-bottom: none;
+        }
+        .contact-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #a1a1aa;
+            font-weight: 600;
+        }
+        .contact-value {
+            font-size: 14px;
+            font-weight: 500;
+            word-break: break-all;
+        }
+
+        /* 4. EXPÉRIENCE */
+        .experience {
+            grid-column: span 2;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 20px;
+            border-left: 1px solid var(--border-color);
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -4px;
+            top: 6px;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--text-main);
+        }
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .exp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 4px;
+        }
+        .exp-title {
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .exp-date {
+            font-size: 12px;
+            color: var(--text-muted);
+            background: #f4f4f5;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+        .exp-tag {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--accent-alternance);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .exp-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* 5. FORMATION */
+        .education {
+            grid-column: span 1;
+        }
+        
+        .edu-item {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+        .edu-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        /* 6. SKILLS */
+        .skills {
+            grid-column: span 4;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .skills .section-title {
+            margin-bottom: 0;
+            margin-right: 16px;
+            width: 100%;
+        }
+
+        .skill-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: #18181b;
+            color: white;
+            border-radius: var(--radius-pill);
+            font-size: 13px;
+            font-weight: 500;
+            transition: transform 0.2s;
+        }
+        .skill-pill:hover {
+            transform: translateY(-2px);
+        }
+        .skill-pill img {
+            width: 14px;
+            height: 14px;
+            filter: brightness(0) invert(1); /* Rend les icones blanches */
+        }
+
+        /* ===================== */
+        /* RESPONSIVE            */
+        /* ===================== */
+        @media (max-width: 900px) {
+            .cv-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .hero { grid-column: span 2; }
+            .photo-card { grid-column: span 2; height: 300px; border-radius: var(--radius-bento); }
+            .contact { grid-column: span 2; grid-row: auto; }
+            .experience { grid-column: span 2; }
+            .education { grid-column: span 2; }
+            .skills { grid-column: span 2; }
+        }
+
+        @media (max-width: 600px) {
+            .cv-container {
+                grid-template-columns: 1fr;
+            }
+            .hero { grid-column: span 1; }
+            .hero-header { flex-direction: column; gap: 16px; }
+            h1 { font-size: 32px; }
+            .photo-card { grid-column: span 1; }
+            .contact { grid-column: span 1; }
+            .experience { grid-column: span 1; }
+            .education { grid-column: span 1; }
+            .skills { grid-column: span 1; }
+        }
+
+        /* ===================== */
+        /* PRINT MODE (A4 PDF)   */
+        /* ===================== */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                display: block;
+            }
+            .cv-container {
+                max-width: 100%;
+                gap: 12px; /* Réduit l'espace pour tenir sur une page */
+            }
+            .card {
+                box-shadow: none;
+                border: 1px solid #d1d1d6;
+                padding: 16px;
+            }
+            .hero { padding: 20px; }
+            .hero::before, .hero::after { display: none; } /* Enleve les couleurs floues à l'impression */
+            
+            /* Forcer les couleurs à l'impression */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="cv-container">
+
+    <!-- HERO SECTION -->
+    <div class="card hero">
+        <div class="hero-header">
+            <div>
+                <h1>Sofian Belloul</h1>
+                <div class="job-title">Développeur Web Full Stack</div>
+            </div>
+            <div class="badge-alternance">Contrat Alternance</div>
+        </div>
+        
+        <div class="availability">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            14 Mois &nbsp;&rsaquo;&nbsp; Septembre 2026
+        </div>
+
+        <p class="hero-desc">
+            Ex-webdesigner Framer reconverti dev — Laravel, Vue.js, Java. 
+            Passionné par l'optimisation, la résolution de problèmes et la création d'architectures propres. 
+            DJ Techno à mes heures, dev le reste du temps.
+        </p>
+    </div>
+
+    <!-- PHOTO SECTION -->
+    <div class="card photo-card">
+        <!-- Remplacer le src par le chemin de votre photo -->
+        <img src="https://images.unsplash.com/photo-1618077360395-f3068be8e001?q=80&w=2000&auto=format&fit=crop" alt="Portrait de Sofian" />
+    </div>
+
+    <!-- CONTACT SECTION -->
+    <div class="card contact">
+        <h2 class="section-title">Contact</h2>
+        
+        <div class="contact-item">
+            <span class="contact-label">Email</span>
+            <span class="contact-value">sofian.belloul@epitech.eu</span>
+        </div>
+        <div class="contact-item">
+            <span class="contact-label">Téléphone</span>
+            <span class="contact-value">07 67 54 62 09</span>
+        </div>
+        <div class="contact-item">
+            <span class="contact-label">Localisation</span>
+            <span class="contact-value">Paris / Île-de-France</span>
+        </div>
+        <div class="contact-item">
+            <span class="contact-label">Réseaux</span>
+            <span class="contact-value">GitHub / LinkedIn</span>
+        </div>
+    </div>
+
+    <!-- EXPERIENCE SECTION -->
+    <div class="card experience">
+        <h2 class="section-title">Expérience Pro</h2>
+        
+        <div class="timeline-item">
+            <div class="exp-header">
+                <span class="exp-title">Connect'IN — Réseau Social</span>
+                <span class="exp-date">3 semaines</span>
+            </div>
+            <span class="exp-tag">Laravel / Vue 3</span>
+            <p class="exp-desc">Projet Epitech. API REST Laravel, auth Sanctum, relations SQL. Front Vue 3/Tailwind. Tests unitaires.</p>
+        </div>
+
+        <div class="timeline-item">
+            <div class="exp-header">
+                <span class="exp-title">My Cinema — Back-Office</span>
+                <span class="exp-date">2 semaines</span>
+            </div>
+            <span class="exp-tag">PHP MVC</span>
+            <p class="exp-desc">Projet Epitech. Architecture MVC from scratch, API REST, Vue 3 + shadcn-vue, logiques métiers avancées.</p>
+        </div>
+
+        <div class="timeline-item">
+            <div class="exp-header">
+                <span class="exp-title">Webdesigner Freelance</span>
+                <span class="exp-date">2 ans</span>
+            </div>
+            <span class="exp-tag">Framer / Indépendant</span>
+            <p class="exp-desc">Sites vitrines et e-commerce haut de gamme. Framer, Shopify, Webflow. Architectures multi-tenants.</p>
+        </div>
+    </div>
+
+    <!-- FORMATION SECTION -->
+    <div class="card education">
+        <h2 class="section-title">Formation</h2>
+        
+        <div class="edu-item">
+            <div class="exp-header">
+                <span class="exp-title">Web@cademie</span>
+                <span class="exp-date">2024 - 2026</span>
+            </div>
+            <span class="exp-tag">By Epitech</span>
+            <p class="exp-desc">Titre RNCP Niveau 5 (BAC+2) — Développeur-Intégrateur Web. PHP (Laravel), Vue 3, Java SE.</p>
+        </div>
+
+        <div class="edu-item">
+            <div class="exp-header">
+                <span class="exp-title">Baccalauréat Général</span>
+                <span class="exp-date">2020 - 2023</span>
+            </div>
+            <span class="exp-tag">Spé. Maths / Physique</span>
+            <p class="exp-desc">Lycée général, spécialités Mathématiques et Physique-Chimie.</p>
+        </div>
+    </div>
+
+    <!-- SKILLS SECTION -->
+    <div class="card skills">
+        <h2 class="section-title" style="margin-bottom: 12px;">Stack Technique</h2>
+        
+        <!-- J'utilise une couleur de fond foncée homogène pour l'élégance, le logo identifie la techno -->
+        <span class="skill-pill"><img src="https://cdn.simpleicons.org/laravel/ffffff" alt="Laravel"> PHP / Laravel</span>
+        <span class="skill-pill"><img src="https://cdn.simpleicons.org/vuedotjs/ffffff" alt="Vue"> Vue 3 / Vite</span>
+        <span class="skill-pill"><img src="https://cdn.simpleicons.org/openjdk/ffffff" alt="Java"> Java SE</span>
+        <span class="skill-pill"><img src="https://cdn.simpleicons.org/tailwindcss/ffffff" alt="Tailwind"> Tailwind CSS</span>
+        <span class="skill-pill"><img src="https://cdn.simpleicons.org/mysql/ffffff" alt="MySQL"> MySQL</span>
+        <span class="skill-pill"><img src="https://cdn.simpleicons.org/docker/ffffff" alt="Docker"> Docker</span>
+        <span class="skill-pill"><img src="https://cdn.simpleicons.org/git/ffffff" alt="Git"> Git / GitHub</span>
+        <span class="skill-pill"><img src="https://cdn.simpleicons.org/archlinux/ffffff" alt="Linux"> Linux</span>
+        <span class="skill-pill"><img src="https://cdn.simpleicons.org/neovim/ffffff" alt="Neovim"> Neovim</span>
+        <span class="skill-pill"><img src="https://cdn.simpleicons.org/figma/ffffff" alt="Figma"> Figma / Framer</span>
+    </div>
+
+</div>
+
+</body>
+</html>

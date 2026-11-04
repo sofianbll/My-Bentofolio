@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sofian Belloul — Développeur Web & Designer</title>
+    <meta name="description" content="Portfolio de Sofian Belloul, développeur web full stack — Laravel, Vue.js, Java. En recherche de contrat d'alternance.">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/sf-pro-display">
+    
+    <!-- Design System -->
+    <link rel="stylesheet" href="main.css">
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+<div class="mesh-bg" aria-hidden="true"></div>
+
+<!-- ═══════════════════════════════════════════
+     NAV
+     ═══════════════════════════════════════════ -->
+<nav class="navbar">
+    <div class="nav-inner">
+        <a href="#" class="nav-brand">
+            <span class="brand-name">Sofian Bll</span>
+            <span class="brand-dot">·</span>
+            <span class="brand-tag">portfolio</span>
+        </a>
+
+        <div class="nav-menu">
+            <a href="#about" class="nav-link active">About</a>
+            <a href="#skills" class="nav-link">Skills</a>
+            <a href="#projects" class="nav-link">Projects</a>
+            <a href="#contact" class="nav-link">Contact</a>
+        </div>
+
+        <div class="nav-controls">
+            <button class="icon-btn" aria-label="Toggle Dark Mode" id="theme-toggle">
+                <i data-lucide="moon" class="icon-moon"></i>
+                <i data-lucide="sun" class="icon-sun"></i>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     BENTO GRID
+     ═══════════════════════════════════════════ -->
+<main class="page">
+    <div class="bento" id="bento-grid">
+
+        <!-- HERO -->
+        <section class="cell cell--hero bento-glow" id="about">
+            <div class="glow-blob"></div>
+            <div class="cell__inner">
+                <div class="hero-pills">
+                    <span class="chip chip--outline">✨ Hello</span>
+                    <span class="chip chip--solid">Recherche Contrat Alternance</span>
+                </div>
+                <h1 class="hero-name">Sofian<br>BELLOUL</h1>
+                <p class="hero-role">Développeur Web Full Stack</p>
+                <div class="hero-meta">
+                    <span>Début <strong>sept. 2026</strong></span>
+                    <span class="meta-sep">·</span>
+                    <span><strong>14 mois</strong></span>
+                    <span class="meta-sep">·</span>
+                    <span><strong>3/1</strong> sem.</span>
+                </div>
+                <p class="hero-bio">
+                    Ex-webdesigner Framer reconverti dev — Laravel, Vue.js, Java.
+                    Grâce au TDAH, j'optimise tout. DJ à mes heures, dev le reste du temps.
+                </p>
+            </div>
+        </section>
+
+        <!-- PHOTO -->
+        <div class="cell cell--photo bento-glow">
+            <div class="glow-blob"></div>
+            <img src="photo.jpg" alt="Sofian Belloul" loading="lazy">
+        </div>
+
+        <!-- CONTACT -->
+        <section class="cell cell--contact bento-glow" id="contact">
+            <div class="glow-blob"></div>
+            <div class="cell__inner">
+                <div class="contact-list">
+                    <div class="contact-row">
+                        <span class="contact-key">Âge</span>
+                        <span class="contact-val">22 ans</span>
+                    </div>
+                    <div class="contact-row">
+                        <span class="contact-key">Localisation</span>
+                        <span class="contact-val">Île-de-France</span>
+                    </div>
+                    <div class="contact-row">
+                        <span class="contact-key">Téléphone</span>
+                        <span class="contact-val">07 67 54 62 09</span>
+                    </div>
+                    <div class="contact-row">
+                        <span class="contact-key">Email</span>
+                        <span class="contact-val">sofian.belloul@epitech.eu</span>
+                    </div>
+                </div>
+                <div class="social-row">
+                    <a href="#" class="social-link">
+                        <i data-lucide="linkedin" class="social-icon"></i>
+                        <span>in/sofianbll</span>
+                    </a>
+                    <a href="https://github.com/Sofian-bll" class="social-link">
+                        <i data-lucide="github" class="social-icon"></i>
+                        <span>Sofian-bll</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- SKILLS -->
+        <section class="cell cell--skills bento-glow" id="skills">
+            <div class="glow-blob"></div>
+            <div class="cell__inner">
+                <h2 class="section-title">Stack</h2>
+                <div class="skills-columns">
+                    <div class="skill-col">
+                        <h3 class="skill-label">Dev Web</h3>
+                        <div class="tags">
+                            <span class="tag t-laravel">PHP / Laravel</span>
+                            <span class="tag t-vue">Vue 3 / Vite</span>
+                            <span class="tag t-java">Java SE</span>
+                            <span class="tag t-tailwind">Tailwind</span>
+                            <span class="tag t-shadcn">shadcn-vue</span>
+                            <span class="tag t-mysql">MySQL</span>
+                        </div>
+                    </div>
+                    <div class="skill-col">
+                        <h3 class="skill-label">DevOps</h3>
+                        <div class="tags">
+                            <span class="tag t-docker">Docker / Sail</span>
+                            <span class="tag t-git">Git / GitHub</span>
+                            <span class="tag t-linux">Linux (Arch)</span>
+                            <span class="tag t-nvim">Neovim / tmux</span>
+                            <span class="tag t-bash">Bash / Make</span>
+                        </div>
+                    </div>
+                    <div class="skill-col">
+                        <h3 class="skill-label">Design & IA</h3>
+                        <div class="tags">
+                            <span class="tag t-figma">Figma</span>
+                            <span class="tag t-framer">Framer</span>
+                            <span class="tag t-python">Python</span>
+                            <span class="tag t-rag">RAG / LLMs</span>
+                            <span class="tag t-n8n">n8n</span>
+                        </div>
+                    </div>
+                    <div class="skill-col">
+                        <h3 class="skill-label">Soft Skills</h3>
+                        <div class="tags">
+                            <span class="tag t-soft">Prise de parole</span>
+                            <span class="tag t-soft">Vulgarisation</span>
+                            <span class="tag t-soft">Leadership</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FORMATION -->
+        <section class="cell cell--formation bento-glow">
+            <div class="glow-blob"></div>
+            <div class="cell__inner">
+                <h2 class="section-title">Formation</h2>
+                <div class="xp-card">
+                    <div class="xp-top">
+                        <h4 class="xp-name">Développeur-Intégrateur Web</h4>
+                        <span class="badge">BAC+2 RNCP</span>
+                    </div>
+                    <p class="xp-where">Web@cademie by EPITECH — Paris · Depuis 2024</p>
+                    <p class="xp-desc">Java, PHP Laravel, Vue 3. Pédagogie par projets. Prise de parole et présentations professionnelles.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- INTERESTS -->
+        <section class="cell cell--interests bento-glow">
+            <div class="glow-blob"></div>
+            <div class="cell__inner">
+                <h2 class="section-title">Centres d'intérêts</h2>
+                <div class="interests">
+                    <div class="interest-row">
+                        <span class="interest-emoji">🎧</span>
+                        <div>
+                            <strong>DJ & Producteur</strong>
+                            <span class="interest-detail">+100k écoutes · Live devant +1 200 pers.</span>
+                        </div>
+                    </div>
+                    <div class="interest-row">
+                        <span class="interest-emoji">⌨️</span>
+                        <div>
+                            <strong>CLI & Productivité</strong>
+                            <span class="interest-detail">Arch, Neovim, tmux, PKM Obsidian</span>
+                        </div>
+                    </div>
+                    <div class="interest-row">
+                        <span class="interest-emoji">🔬</span>
+                        <div>
+                            <strong>Science</strong>
+                            <span class="interest-detail">Physique quantique, cybersécurité</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PROJECTS -->
+        <section class="cell cell--projects bento-glow" id="projects">
+            <div class="glow-blob"></div>
+            <div class="cell__inner">
+                <div class="section-header">
+                    <h2 class="section-title">Projets</h2>
+                    <a href="#" class="link-arrow">Voir tout <i data-lucide="arrow-right"></i></a>
+                </div>
+                <div class="project-grid">
+                    <div class="project-card">
+                        <div class="pc-top">
+                            <h4 class="pc-name">Connect'IN</h4>
+                            <span class="badge badge--color" style="--badge-c:var(--c-laravel)">Laravel</span>
+                        </div>
+                        <p class="pc-meta">Réseau social · Binôme · 3 sem.</p>
+                        <p class="pc-desc">API REST, auth Sanctum, relations SQL, tests unitaires.</p>
+                    </div>
+                    <div class="project-card">
+                        <div class="pc-top">
+                            <h4 class="pc-name">My Cinema</h4>
+                            <span class="badge badge--color" style="--badge-c:var(--c-rag)">PHP MVC</span>
+                        </div>
+                        <p class="pc-meta">Back-Office · Solo · 2 sem.</p>
+                        <p class="pc-desc">Architecture MVC from scratch, SoftDeletes, anti-chevauchement.</p>
+                    </div>
+                    <div class="project-card">
+                        <div class="pc-top">
+                            <h4 class="pc-name">Piscine Java</h4>
+                            <span class="badge badge--color" style="--badge-c:var(--c-java)">Java SE</span>
+                        </div>
+                        <p class="pc-meta">Bootcamp · Solo · 2 sem.</p>
+                        <p class="pc-desc">Design Patterns, Génériques, Réflexion, Testeur custom.</p>
+                    </div>
+                    <div class="project-card">
+                        <div class="pc-top">
+                            <h4 class="pc-name">Freelance Web</h4>
+                            <span class="badge badge--color" style="--badge-c:var(--c-framer)">Framer</span>
+                        </div>
+                        <p class="pc-meta">Indépendant · 2 ans</p>
+                        <p class="pc-desc">Sites e-commerce et vitrines haut de gamme, Shopify × Framer.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</main>
+
+<script src="script.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>
